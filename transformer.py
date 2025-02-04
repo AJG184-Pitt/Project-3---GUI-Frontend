@@ -11,11 +11,11 @@ class Transformer:
         self.yprim = None
 
         def calc_impedance(self):
-            theta = np.atan(x_over_r_ratio)
-            zpu = self.impedance_percent/100
-            xpu = zpu/ np.sin(theta)
-            rpu = zpu / np.cos(theta)
-            return self.zt
+            self.theta = np.atan(self.x_over_r_ratio)
+            self.zpu = self.impedance_percent/100
+            self.xpu = self.zpu/ np.sin(self.theta)
+            self.rpu = self.zpu / np.cos(self.theta)
+            return self.self.zt
 
         def calc_admittance(self):
             if self.zt != 0:

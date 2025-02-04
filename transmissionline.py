@@ -9,3 +9,4 @@ class TransmissionLine:
         self.zseries, self.yshunt = self.calc_admittances()
 
     def calc_admittances(self):
+        return

@@ -7,3 +7,4 @@ class Bundle:
         self.DSC, self.DSL = self.calc_radii()
 
     def calc_radii(self):
+        return

@@ -1,3 +1,5 @@
+import math
+
 class Geometry:
     def __init__(self, name, xa, ya, xb, yb, xc, yc):
         self.name = name
@@ -9,4 +11,11 @@ class Geometry:
         self.yc = yc
         self.Deq = self.calc_Deq()
 
+    # Source: https://www.cuemath.com/distance-formula/
+
     def calc_Deq(self):
+        dab = math.sqrt((self.xb**2 - self.xa**2) + (self.yb**2 - self.ya**2))
+        dbc = math.sqrt((self.xc**2 - self.xb**2) + (self.yc**2 - self.yb**2))
+        dac = math.sqrt((self.xc**2 - self.xa**2) + (self.yc**2 - self.ya**2))
+
+        return (dab + dbc + dac) / 3

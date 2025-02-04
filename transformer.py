@@ -11,6 +11,7 @@ class Transformer:
         self.yprim = None
 
         def calc_impedance(self):
-
+            return
 
         def calc_admittance(self):
+            return

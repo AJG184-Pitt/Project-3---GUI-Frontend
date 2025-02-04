@@ -15,7 +15,7 @@ class Transformer:
             self.zpu = self.impedance_percent/100
             self.xpu = self.zpu/ np.sin(self.theta)
             self.rpu = self.zpu / np.cos(self.theta)
-            return self.self.zt
+            return self.zt
 
         def calc_admittance(self):
             if self.zt != 0:

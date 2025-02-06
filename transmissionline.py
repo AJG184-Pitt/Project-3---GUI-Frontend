@@ -8,8 +8,9 @@ class TransmissionLine:
         self.conductor = conductor
         self.geometry = geometry
         self.length = length
+        self.rseries, self.xseries = float
         self.f = 60
-        self.rseries, self.xseries, self.bseries, self.yseries = self.calc_series()
+        self.bseries, self.yseries, self.zseries = self.calc_series()
 
 
     def calc_series(self):
@@ -17,3 +18,5 @@ class TransmissionLine:
         self.xseries = (2 * np.pi * self.f) * (2 * 10 ** -7) * np.log(self.geometry.Deq/self.bundle.DSL) * 1609.34
         self.bseries = (2 * np.pi * self.f) * ((2 * np.pi * 8.854 * 10 ** -12)/(np.log(self.geometry.Deq/self.bundle.DSC))) * 1609.34
         self.yseries = 1 / (self.rseries + (1j * self.xseries))
+        self.zseries = self.rseries + self.xseries
+        return self.bseries, self.yseries, self.zseries

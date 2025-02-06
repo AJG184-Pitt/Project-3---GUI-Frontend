@@ -1,7 +1,7 @@
 from transmissionline import TransmissionLine
-from bundle import Bundle
-from conductor import Conductor
 
-conductor1 = Conductor("Partridge", 0.642, 0.0217, 0.385, 460)
-bundle1 = Bundle("Bundle 1", 2, 1.5, conductor1)
-transmission1 = TransmissionLine("T1", "B1", "B2", 2, )
+line1 = TransmissionLine("Line 1", "bus1","bus2", TransmissionLine.bundle, TransmissionLine.geometry, 10)
+
+
+print(line1.name, line1.bus1.name, line1.bus2.name, line1.length)
+print(line1.zseries, line1.bseries, line1.yseries)

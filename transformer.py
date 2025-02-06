@@ -8,7 +8,9 @@ class Transformer:
         self.power_rating = power_rating
         self.impedance_percent = impedance_percent
         self.x_over_r_ratio = x_over_r_ratio
-        self.zt = self.calc_impedance()
+        self.xpu, self.rpu. self.theta = float
+        #per unit calc will need to change to impedence eventually
+        self.zpu = self.calc_impedance()
         self.yt = self.calc_admittance()
         self.yprim = None
 
@@ -17,10 +19,10 @@ class Transformer:
         self.zpu = self.impedance_percent/100
         self.xpu = self.zpu/ np.sin(self.theta)
         self.rpu = self.zpu / np.cos(self.theta)
-        return self.zt
+        return self.zpu
 
     def calc_admittance(self):
-        if self.zt != 0:
-                return 1 / self.zt
+        if self.zpu != 0:
+                return 1/self.zpu
             else:
                 return 0

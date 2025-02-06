@@ -5,5 +5,5 @@ class Conductor:
         self.radius = diam / 24
         self.GMR = GMR
         self.resistance = resistance
-        self.resistance_c = self.resistance_c
+        # self.resistance_c = float
         self.ampacity = ampacity

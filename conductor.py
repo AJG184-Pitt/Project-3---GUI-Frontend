@@ -5,5 +5,4 @@ class Conductor:
         self.radius = diam / 24 # Need to convert feet to inches (12*2 = 24)
         self.GMR = GMR
         self.resistance = resistance
-        # self.resistance_c = float
         self.ampacity = ampacity

@@ -23,3 +23,5 @@ class Bundle:
             self.DSL = 1.091 * np.power(self.conductor.GMR * self.spacing**4, 1/4)
         else:
             print("Invalid conductors for a bundle")
+
+        return self.DSC, self.DSL

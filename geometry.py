@@ -1,7 +1,8 @@
 import numpy as np
 
 class Geometry:
-    def __init__(self, name, xa, ya, xb, yb, xc, yc):
+
+    def __init__(self, name: str, xa: float, ya: float, xb: float, yb: float, xc: float, yc: float):
         self.name = name
         self.xa = xa
         self.ya = ya
@@ -14,8 +15,9 @@ class Geometry:
     # Source: https://www.cuemath.com/distance-formula/
 
     def calc_Deq(self):
-        dab = np.sqrt((self.xb**2 - self.xa**2) + (self.yb**2 - self.ya**2))
-        dbc = np.sqrt((self.xc**2 - self.xb**2) + (self.yc**2 - self.yb**2))
-        dac = np.sqrt((self.xc**2 - self.xa**2) + (self.yc**2 - self.ya**2))
+
+        dab = np.sqrt((self.xb - self.xa)**2 + (self.yb - self.ya)**2)
+        dbc = np.sqrt((self.xc - self.xb)**2 + (self.yc - self.yb)**2)
+        dac = np.sqrt((self.xc - self.xa)**2 + (self.yc - self.ya)**2)
 
         return (dab + dbc + dac) / 3

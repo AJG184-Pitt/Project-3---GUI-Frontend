@@ -1,5 +1,5 @@
 class Conductor:
-    def __init__(self, name, diam, GMR, resistance, ampacity):
+    def __init__(self, name: str, diam: float, GMR: float, resistance: float, ampacity: float):
         self.name = name
         self.diam = diam
         self.radius = diam / 24

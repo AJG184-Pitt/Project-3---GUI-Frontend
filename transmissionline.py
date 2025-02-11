@@ -17,8 +17,12 @@ class TransmissionLine:
         self.rseries, self.xseries = float
         self.f = 60
         self.yseries, self.zseries = self.calc_series()
+<<<<<<< Updated upstream
         self.bshunt = self.calc_admitance()
 
+=======
+        self.bshunt = self.calc_admittance()
+>>>>>>> Stashed changes
 
     def calc_series(self):
         self.rseries = self.conductor.resistance/self.bundle.num_conductors
@@ -27,6 +31,11 @@ class TransmissionLine:
         self.zseries = self.rseries + self.xseries
         return self.yseries, self.zseries
 
+<<<<<<< Updated upstream
     def calc_admitance(self):
         self.bshunt = (2 * np.pi * self.f) * ((2 * np.pi * 8.854 * 10 ** -12) / (np.log(self.geometry.Deq / self.bundle.DSC))) * 1609.34
         return self.bshunt
+=======
+    def calc_admittance(self):
+        return (2 * np.pi * self.f) * ((2 * np.pi * 8.854 * 10 ** -12)/(np.log(self.geometry.Deq/self.bundle.DSC))) * 1609.34
+>>>>>>> Stashed changes

@@ -1,7 +1,9 @@
 import numpy as np
+import warnings
+from conductor import Conductor
 
 class Bundle:
-    def __init__(self, name, num_conductors, spacing, conductor):
+    def __init__(self, name: str, num_conductors: int, spacing: float, conductor: Conductor):
         self.name = name
         self.num_conductors = num_conductors
         self.spacing = spacing
@@ -22,6 +24,9 @@ class Bundle:
             self.DSC = 1.091 * np.power(self.conductor.radius * self.spacing**4, 1/4)
             self.DSL = 1.091 * np.power(self.conductor.GMR * self.spacing**4, 1/4)
         else:
-            print("Invalid conductors for a bundle")
+
+            warnings.warn("Invalid number of conductors for bundle")
+            self.DSC = 1
+            self.DSL = 1
 
         return self.DSC, self.DSL

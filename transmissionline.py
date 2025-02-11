@@ -14,11 +14,11 @@ class TransmissionLine:
         self.conductor = conductor
         self.geometry = geometry
         self.length = length
-        self.rseries, self.xseries = float
+        self.rseries = float
+        self.xseries = float
         self.f = 60
         self.yseries, self.zseries = self.calc_series()
         self.bshunt = self.calc_admitance()
-
 
     def calc_series(self):
         self.rseries = self.conductor.resistance/self.bundle.num_conductors
@@ -29,4 +29,5 @@ class TransmissionLine:
 
     def calc_admittance(self):
         return (2 * np.pi * self.f) * ((2 * np.pi * 8.854 * 10 ** -12)/(np.log(self.geometry.Deq/self.bundle.DSC))) * 1609.34
+
 

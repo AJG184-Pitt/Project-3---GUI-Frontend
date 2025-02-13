@@ -33,7 +33,7 @@ class Transformer:
         return self.rpu + 1j * self.xpu
 
     def calc_admittance(self):
-        if abs(self.zpu) >= 1e-10:
+        if self.zpu != 0.0:
             return 1.0 / self.zpu
         else:
             return 0.0 + 0.0j

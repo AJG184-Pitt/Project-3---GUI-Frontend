@@ -18,7 +18,7 @@ class TransmissionLine:
         self.xseries = float
         self.f = 60
         self.yseries, self.zseries = self.calc_series()
-        self.bshunt = self.calc_admitance()
+        self.bshunt = self.calc_admittance()
 
     def calc_series(self):
         self.rseries = self.conductor.resistance/self.bundle.num_conductors

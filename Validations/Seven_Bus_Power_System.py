@@ -22,13 +22,13 @@ circuit1.add_conductor("C1",.642, .0217, .385, 460)
 circuit1.add_bundle("B1",2, 1.5, "C1")
 
 #adding the geometry
-circuit1.add_geometry( "G1", 0, 0, 0, 0, 0, 0) # ask about how to find x and y values
+circuit1.add_geometry( "G1", 0, 0, 18.5, 0, 37, 0) # ask about how to find x and y values
 
 #adding the 6 transmission lines
-circuit1.add_transmission_line("L1", "Bus2", "Bus4", "B1", "C1", "G1", 10, 60)
-circuit1.add_transmission_line("L2", "Bus2", "Bus3", "B1", "C1", "G1", 25, 60)
-circuit1.add_transmission_line("L3", "Bus3", "Bus5", "B1", "C1", "G1", 20, 60)
-circuit1.add_transmission_line("L4", "Bus4", "Bus6", "B1", "C1", "G1", 20, 60)
-circuit1.add_transmission_line("L5", "Bus5", "Bus6", "B1", "C1", "G1", 10, 60)
-circuit1.add_transmission_line("L6", "Bus4", "Bus5", "B1", "C1", "G1", 35, 60)
+circuit1.add_transmission_line("L1", "Bus2", "Bus4", "B1", "C1", "G1", 10)
+circuit1.add_transmission_line("L2", "Bus2", "Bus3", "B1", "C1", "G1", 25)
+circuit1.add_transmission_line("L3", "Bus3", "Bus5", "B1", "C1", "G1", 20)
+circuit1.add_transmission_line("L4", "Bus4", "Bus6", "B1", "C1", "G1", 20)
+circuit1.add_transmission_line("L5", "Bus5", "Bus6", "B1", "C1", "G1", 10)
+circuit1.add_transmission_line("L6", "Bus4", "Bus5", "B1", "C1", "G1", 35)
 

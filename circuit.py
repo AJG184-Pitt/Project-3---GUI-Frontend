@@ -16,7 +16,7 @@ class Circuit:
         self.transmission_lines = dict()
 
     def add_bundle(self, name, num_conductors, spacing, conductor):
-        bundle_obj = Bundle(name, num_conductors, spacing, conductor)
+        bundle_obj = Bundle(name, num_conductors, spacing, self.conductors[conductor])
         self.bundles[name] = bundle_obj
 
     def add_bus(self, name, bas_kv):
@@ -32,9 +32,9 @@ class Circuit:
         self.geometries[name] = geometry_obj
     
     def add_transformer(self, name, bus1, bus2, power_rating, impedance_percent, x_over_r_ratio):
-        transformer_obj = Transformer(name, bus1, bus2, power_rating, impedance_percent, x_over_r_ratio)
+        transformer_obj = Transformer(name, self.buses[bus1], self.buses[bus2], power_rating, impedance_percent, x_over_r_ratio)
         self.transformers[name] = transformer_obj
     
-    def add_transmission_line(self, name, bus1, bus2, bundle, conductor, geometry, length,f):
-        transmission_line_obj = TransmissionLine(name, bus1, bus2, bundle, conductor, geometry, length,f)
+    def add_transmission_line(self, name, bus1, bus2, bundle, conductor, geometry, length):
+        transmission_line_obj = TransmissionLine(name, self.buses[bus1], self.buses[bus2], self.bundles[bundle], self.conductors[conductor], self.geometries[geometry], length)
         self.transmission_lines[name] = transmission_line_obj

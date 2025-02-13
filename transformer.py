@@ -20,12 +20,20 @@ class Transformer:
     def calc_impedance(self):
         theta = np.atan(self.x_over_r_ratio)
         zmag = self.impedance_percent/100
-        self.xpu = zmag/ np.sin(theta)
-        self.rpu = zmag / np.cos(theta)
+
+        s_base = self.power_rating
+        x_base = zmag * np.cos(theta)
+        r_base = zmag * np.sin(theta)
+        v_base = self.bus1.base_kv
+        z_base = v_base**2/s_base
+
+        self.xpu = x_base / z_base
+        self.rpu = r_base / z_base
+
         return self.rpu + 1j * self.xpu
 
     def calc_admittance(self):
-        if self.zpu != 0:
-            return 1/self.zpu
+        if abs(self.zpu) >= 1e-10:
+            return 1.0 / self.zpu
         else:
-            return 0
+            return 0.0 + 0.0j

@@ -19,16 +19,24 @@ class TransmissionLine:
         self.f = 60
         self.yseries, self.zseries = self.calc_series()
         self.bshunt = self.calc_admittance()
+        self.yprim = self.calc_matrix()
 
     def calc_series(self):
         self.rseries = self.conductor.resistance/self.bundle.num_conductors
         self.xseries = (2 * np.pi * self.f) * (2 * 10 ** -7) * np.log(self.geometry.Deq/self.bundle.DSL) * 1609.34
         self.yseries = 1 / (self.rseries + (1j * self.xseries))
-        self.zseries = self.rseries + self.xseries
+        self.zseries = self.rseries + 1j * self.xseries
         return self.yseries, self.zseries
 
     def calc_admittance(self):
-        return (2 * np.pi * self.f) * ((2 * np.pi * 8.854 * 10 ** -12)/(np.log(self.geometry.Deq/self.bundle.DSC))) * 1609.34
+        self.bshunt = (2 * np.pi * self.f) * ((2 * np.pi * 8.854 * 10 ** -12)/(np.log(self.geometry.Deq/self.bundle.DSC))) * 1609.34
+        return self.bshunt
+
+    def calc_matrix(self):
+        yshunt = 1j * self.bshunt
+        self.yprim = np.array([[self.yseries + yshunt/2, -1*self.yseries],
+                            [-1*self.yseries, self.yseries + yshunt/2]])
+        return self.yprim
 
 if __name__ == '__main__':
     bus1 = Bus("Bus_1", 180)

@@ -21,16 +21,15 @@ class Transformer:
         theta = np.atan(self.x_over_r_ratio)
         zmag = self.impedance_percent/100
 
+        s_base = self.power_rating
         x_base = zmag * np.cos(theta)
         r_base = zmag * np.sin(theta)
-        v1_base = self.bus1.base_kv
-        v2_base = self.bus2.base_kv
+        v_base = self.bus1.base_kv
+        z_base = v_base**2/s_base
 
-        system_base = (v1_base * v2_base) / self.x_over_r_ratio
-        conversion = system_base / self.power_rating
+        self.xpu = x_base / z_base
+        self.rpu = r_base / z_base
 
-        self.xpu = x_base * conversion
-        self.rpu = r_base * conversion
         return self.rpu + 1j * self.xpu
 
     def calc_admittance(self):

@@ -54,5 +54,7 @@ if __name__ == '__main__':
 
     line1 = TransmissionLine("Line 1", bus1, bus2, bundle1, conductor1, geometry1, 10)
 
-    print(
-        f"Line: {line1.name}, bus1: {line1.bus1}, bus2: {line1.bus2}, bundle1 {line1.bundle}: geometry: {line1.geometry}, length: {line1.length}")
+    print(f"Line: {line1.name}, bus1: {line1.bus1}, bus2: {line1.bus2}, bundle1 {line1.bundle}: geometry: {line1.geometry}, length: {line1.length}")
+    print(line1.calc_matrix())
+    print(line1.calc_admittance())
+    print(line1.calc_series())

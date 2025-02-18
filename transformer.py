@@ -12,10 +12,10 @@ class Transformer:
         self.x_over_r_ratio = x_over_r_ratio
         self.xpu = float
         self.rpu = float
-        # per unit calc will need to change to impedence eventually
+        # per unit calc will need to change to impedance eventually
         self.zpu = self.calc_impedance()
-        self.yt = self.calc_admittance()
-        self.yprim = None
+        self.yseries = self.calc_admittance()
+        self.yprim = self.calc_matrix()
 
     def calc_impedance(self):
         theta = np.atan(self.x_over_r_ratio)
@@ -37,6 +37,11 @@ class Transformer:
             return 1.0 / self.zpu
         else:
             return 0.0 + 0.0j
+
+    def calc_matrix(self):
+        self.yprim = np.array([[self.yseries, -1*self.yseries],
+                            [-1*self.yseries, self.yseries]])
+        return self.yprim
 
 if __name__ == '__main__':
     bus1 = Bus("B1", 180)

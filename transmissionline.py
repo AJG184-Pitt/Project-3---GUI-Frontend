@@ -14,28 +14,35 @@ class TransmissionLine:
         self.conductor = conductor
         self.geometry = geometry
         self.length = length
-        self.rseries = float
-        self.xseries = float
+        self.rseries, self.rpu = float
+        self.xseries, self.xpu = float
         self.f = 60
-        self.yseries, self.zseries = self.calc_series()
-        self.bshunt = self.calc_admittance()
+        self.zpu, self.ypu = self.calc_series()
+        self.bpu = float
+        self.bpu = self.calc_admittance()
         self.yprim = self.calc_matrix()
 
     def calc_series(self):
         self.rseries = self.conductor.resistance/self.bundle.num_conductors
         self.xseries = (2 * np.pi * self.f) * (2 * 10 ** -7) * np.log(self.geometry.Deq/self.bundle.DSL) * 1609.34
-        self.yseries = 1 / (self.rseries + (1j * self.xseries))
-        self.zseries = self.rseries + 1j * self.xseries
-        return self.yseries, self.zseries
+        z_base = self.bus1.base_kv**2/self.bus1.s_sys
+
+        self.rpu = self.rseries/z_base
+        self.xpu = self.xseries/z_base
+        self.ypu = 1 / (self.rpu + (1j * self.xpu))
+        self.zpu = self.rpu + 1j * self.xpu
+        return self.zpu, self.ypu
 
     def calc_admittance(self):
-        self.bshunt = (2 * np.pi * self.f) * ((2 * np.pi * 8.854 * 10 ** -12)/(np.log(self.geometry.Deq/self.bundle.DSC))) * 1609.34
-        return self.bshunt
+        bshunt = (2 * np.pi * self.f) * ((2 * np.pi * 8.854 * 10 ** -12)/(np.log(self.geometry.Deq/self.bundle.DSC))) * 1609.34
+        y_base = self.bus1.s_sys/self.bus1.base_kv**2
+        self.bpu = bshunt/ y_base
+        return self.bpu
 
     def calc_matrix(self):
-        yshunt = 1j * self.bshunt
-        self.yprim = np.array([[self.yseries + yshunt/2, -1*self.yseries],
-                            [-1*self.yseries, self.yseries + yshunt/2]])
+        yshunt = 1j * self.bpu
+        self.yprim = np.array([[self.ypu + yshunt/2, -1*self.ypu],
+                            [-1*self.ypu, self.ypu + yshunt/2]])
         return self.yprim
 
 if __name__ == '__main__':

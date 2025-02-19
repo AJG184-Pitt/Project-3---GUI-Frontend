@@ -1,0 +1,15 @@
+@startuml
+class circuit {
+    +string name
+    +dict bundles
+    +dict buses
+    +dict conductors
+    +dict geometries
+    +dict transformers
+    +dict transmission_lines
+
+    +add_bundle(name, num_conductors, spacing, conductor)
+    +add_bus(name, base_kv)
+
+}
+@enduml

@@ -12,23 +12,30 @@ class Transformer:
         self.x_over_r_ratio = x_over_r_ratio
         self.xpu = float
         self.rpu = float
-        # per unit calc will need to change to impedance eventually
+        self.xpu_xfmr = float
+        self.rpu_xfmr = float
         self.zpu = self.calc_impedance()
-        self.yseries = self.calc_admittance()
+        self.ypu = self.calc_admittance()
         self.yprim = self.calc_matrix()
 
     def calc_impedance(self):
         theta = np.atan(self.x_over_r_ratio)
         zmag = self.impedance_percent/100
 
-        s_base = self.power_rating
+        s_sys = self.power_rating
+        s_base = self.bus1.s_sys
         x_base = zmag * np.cos(theta)
         r_base = zmag * np.sin(theta)
         v_base = self.bus1.base_kv
         z_base = v_base**2/s_base
 
-        self.xpu = x_base / z_base
-        self.rpu = r_base / z_base
+        #transformer specific per unit
+        self.xpu_xfmr = x_base / z_base
+        self.rpu_xfmr = r_base / z_base
+
+        #system per unit
+        self.xpu = self.xpu_xfmr / (s_base/s_sys)
+        self.rpu = self.rpu_xfmr / (s_base/s_sys)
 
         return self.rpu + 1j * self.xpu
 
@@ -39,8 +46,8 @@ class Transformer:
             return 0.0 + 0.0j
 
     def calc_matrix(self):
-        self.yprim = np.array([[self.yseries, -1*self.yseries],
-                            [-1*self.yseries, self.yseries]])
+        self.yprim = np.array([[self.ypu, -1*self.ypu],
+                            [-1*self.ypu, self.ypu]])
         return self.yprim
 
 if __name__ == '__main__':

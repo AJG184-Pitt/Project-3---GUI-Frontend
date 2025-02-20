@@ -51,6 +51,7 @@ class Transformer:
         return self.yprim
 
 if __name__ == '__main__':
+    # These need updated to new parameters
     bus1 = Bus("B1", 180)
     bus2 = Bus("B2", 230)
 

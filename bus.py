@@ -12,15 +12,15 @@ class Bus:
         self.vpu = vpu
         self.delta = delta
 
-        if bus_type == "Slack Bus" and bus_type == "PQ Bus" and bus_type == "PV Bus":
+        if bus_type == "Slack Bus" or bus_type == "PQ Bus" or bus_type == "PV Bus":
             self.bus_type = bus_type
         else:
             warnings.warn("bus_type not specified to 'Slack Bus', 'PQ Bus', or 'PV Bus'. Defaulting to 'Slack Bus'")
             self.bus_type = "Slack Bus"
 
 if __name__ == '__main__':
-    bus1 = Bus("Bus 1", 20)
-    bus2 = Bus("Bus 2", 230)
+    bus1 = Bus("Bus 1", 20, "PV Bus")
+    bus2 = Bus("Bus 2", 230, "PQ Bus")
 
     print(f"Bus 1: {bus1.name}, {bus1.base_kv}, {bus1.index}")
     print(f"Bus 2: {bus2.name}, {bus2.base_kv}, {bus2.index}")

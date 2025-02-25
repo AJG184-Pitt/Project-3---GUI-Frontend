@@ -19,23 +19,28 @@ class Transformer:
         self.yprim = self.calc_matrix()
 
     def calc_impedance(self):
-        theta = np.atan(self.x_over_r_ratio)
-        zmag = self.impedance_percent/100
+        self.zpu = self.impedance_percent / 100*self.bus1.s_sys / self.power_rating*np.exp(1j * np.arctan(self.x_over_r_ratio))
+        # theta = np.atan(self.x_over_r_ratio)
+        # zmag = self.impedance_percent/100
+        #
+        # s_sys = self.power_rating
+        # s_base = self.bus1.s_sys
+        # x_base = zmag * np.cos(theta)
+        # r_base = zmag * np.sin(theta)
+        # v_base = self.bus1.base_kv
+        # z_base = v_base**2/s_base
+        #
+        # #transformer specific per unit
+        # self.xpu_xfmr = x_base / z_base
+        # self.rpu_xfmr = r_base / z_base
+        #
+        # #system per unit
+        # self.xpu = self.xpu_xfmr / (s_base/s_sys)
+        # self.rpu = self.rpu_xfmr / (s_base/s_sys)
 
-        s_sys = self.power_rating
-        s_base = self.bus1.s_sys
-        x_base = zmag * np.cos(theta)
-        r_base = zmag * np.sin(theta)
-        v_base = self.bus1.base_kv
-        z_base = v_base**2/s_base
+        self.rpu = self.zpu.real
+        self.xpu = self.zpu.imag
 
-        #transformer specific per unit
-        self.xpu_xfmr = x_base / z_base
-        self.rpu_xfmr = r_base / z_base
-
-        #system per unit
-        self.xpu = self.xpu_xfmr / (s_base/s_sys)
-        self.rpu = self.rpu_xfmr / (s_base/s_sys)
 
         return self.rpu + 1j * self.xpu
 
@@ -60,3 +65,4 @@ if __name__ == '__main__':
         f"{transformer1.name} {transformer1.bus1}, {transformer1.bus2}, {transformer1.power_rating}, {transformer1.impedance_percent}, {transformer1.x_over_r_ratio}")
     print(transformer1.calc_admittance())
     print(transformer1.calc_impedance())
+    print(transformer1.calc_matrix())

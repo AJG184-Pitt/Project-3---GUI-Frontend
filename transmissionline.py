@@ -14,17 +14,19 @@ class TransmissionLine:
         self.conductor = conductor
         self.geometry = geometry
         self.length = length
-        self.rseries, self.rpu = float
-        self.xseries, self.xpu = float
+        self.rseries : float
+        self.rpu: float
+        self.xseries : float
+        self.xpu: float
         self.f = 60
         self.zpu, self.ypu = self.calc_series()
-        self.bpu = float
+        self.bpu : float
         self.bpu = self.calc_admittance()
         self.yprim = self.calc_matrix()
 
     def calc_series(self):
-        self.rseries = self.conductor.resistance/self.bundle.num_conductors
-        self.xseries = (2 * np.pi * self.f) * (2 * 10 ** -7) * np.log(self.geometry.Deq/self.bundle.DSL) * 1609.34
+        self.rseries = (self.conductor.resistance/self.bundle.num_conductors)*self.length
+        self.xseries = (2 * np.pi * self.f) * (2 * 10 ** -7) * np.log(self.geometry.Deq/self.bundle.DSL) * 1609.34 * self.length
         z_base = self.bus1.base_kv**2/self.bus1.s_sys
 
         self.rpu = self.rseries/z_base
@@ -34,7 +36,7 @@ class TransmissionLine:
         return self.zpu, self.ypu
 
     def calc_admittance(self):
-        bshunt = (2 * np.pi * self.f) * ((2 * np.pi * 8.854 * 10 ** -12)/(np.log(self.geometry.Deq/self.bundle.DSC))) * 1609.34
+        bshunt = (2 * np.pi * self.f) * ((2 * np.pi * 8.854 * 10 ** -12)/(np.log(self.geometry.Deq/self.bundle.DSC))) * 1609.34 * self.length
         y_base = self.bus1.s_sys/self.bus1.base_kv**2
         self.bpu = bshunt/ y_base
         return self.bpu
@@ -46,7 +48,7 @@ class TransmissionLine:
         return self.yprim
 
 if __name__ == '__main__':
-    bus1 = Bus("Bus_1", 180)
+    bus1 = Bus("Bus_1", 230)
     bus2 = Bus("Bus_2", 230)
     conductor1 = Conductor("Partridge", 0.642, 0.0217, 0.385, 460)
     bundle1 = Bundle("Bundle 1", 2, 1.5, conductor1)
@@ -56,3 +58,4 @@ if __name__ == '__main__':
 
     print(
         f"Line: {line1.name}, bus1: {line1.bus1}, bus2: {line1.bus2}, bundle1 {line1.bundle}: geometry: {line1.geometry}, length: {line1.length}")
+    print(line1.calc_matrix())

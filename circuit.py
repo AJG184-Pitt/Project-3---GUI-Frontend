@@ -66,3 +66,10 @@ class Circuit:
                 raise ValueError(f"Bus {self.buses[i].name} has no self-admittance")
 
         self.ybus = Ybus
+
+if __name__ == '__main__':
+    circuit = Circuit("C1")
+
+
+
+    circuit.calc_ybus()

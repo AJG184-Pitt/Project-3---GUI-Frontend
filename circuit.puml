@@ -1,5 +1,5 @@
 @startuml
-class circuit {
+class Circuit {
     +str name
     +dict bundles
     +dict buses
@@ -11,12 +11,7 @@ class circuit {
     +add_bundle(name: str, num_conductors: int, spacing: float, conductor: Conductor):)
     +add_bus(name, base_kv)
     +add_conductor(name, diam, GMR, resistance, ampacity)
-
 }
-
-circuit --> Bundle
-circuit --> Bus
-circuit --> Conductor
 
 class Bundle {
     +str name
@@ -43,4 +38,39 @@ class Conductor {
     +float ampacity
     -float radius
 }
+
+class Generator {
+
+}
+
+class Geometry {
+
+}
+
+class Load {
+
+}
+
+class Settings {
+
+}
+
+class Transformer {
+
+}
+
+class TransmissionLine {
+
+}
+
+Circuit --> Bundle
+Circuit --> Bus
+Circuit --> Conductor
+Circuit --> Generator
+Circuit --> Geometry
+Circuit --> Load
+Circuit --> Settings
+Circuit --> Transformer
+Circuit --> TransmissionLine
+
 @enduml

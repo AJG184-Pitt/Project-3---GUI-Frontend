@@ -48,8 +48,8 @@ class Circuit:
         Ybus = np.zeros((N, N), dtype=complex)
 
         # Iterate through components
-        for component in self.transformers + self.transmission_lines:
-            Yprim = component.yprim
+        for component in list(self.transformers.values()) + list(self.transmission_lines.values()):
+            Yprim = component.yprim()
             bus1_index = self.buses.index(component.bus1)
             bus2_index = self.buses.index(component.bus2)
 
@@ -84,3 +84,5 @@ if __name__ == '__main__':
     circuit.add_transmission_line("L1", "Bus1", "Bus2", "Bundle1", "ACSR", "Triangle", 10)
 
     circuit.calc_ybus()
+
+    print(circuit.calc_ybus())

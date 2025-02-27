@@ -15,7 +15,7 @@ class Circuit:
         self.geometries = dict()
         self.transformers = dict()
         self.transmission_lines = dict()
-        self.ybus = None
+        self.ybus = self.calc_ybus()
 
     def add_bundle(self, name, num_conductors, spacing, conductor):
         bundle_obj = Bundle(name, num_conductors, spacing, self.conductors[conductor])
@@ -66,3 +66,6 @@ class Circuit:
                 raise ValueError(f"Bus {self.buses[i].name} has no self-admittance")
 
         self.ybus = Ybus
+
+
+

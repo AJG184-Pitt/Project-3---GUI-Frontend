@@ -14,8 +14,10 @@ class TransmissionLine:
         self.conductor = conductor
         self.geometry = geometry
         self.length = length
-        self.rseries, self.rpu = float
-        self.xseries, self.xpu = float
+        self.rseries = float
+        self.rpu = float
+        self.xseries = float
+        self.xpu = float
         self.f = 60
         self.zpu, self.ypu = self.calc_series()
         self.bpu = float

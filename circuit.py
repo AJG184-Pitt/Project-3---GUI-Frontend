@@ -21,8 +21,8 @@ class Circuit:
         bundle_obj = Bundle(name, num_conductors, spacing, self.conductors[conductor])
         self.bundles[name] = bundle_obj
 
-    def add_bus(self, name, base_kv):
-        bus_obj = Bus(name, base_kv)
+    def add_bus(self, name, base_kv, bus_type, vpu=1.0, delta=0.0):
+        bus_obj = Bus(name, base_kv, bus_type, vpu, delta)
         self.buses[name] = bus_obj
         
     def add_conductor(self, name, diam, GMR, resistance, ampacity):
@@ -68,8 +68,19 @@ class Circuit:
         self.ybus = Ybus
 
 if __name__ == '__main__':
-    circuit = Circuit("C1")
+    circuit = Circuit("Test Circuit")
 
+    circuit.add_bus("Bus1", 132, "Slack Bus")
+    circuit.add_bus("Bus2", 33, "Slack Bus")
 
+    circuit.add_conductor("ACSR", 25.76, 0.0111, 0.0891, 780)
+
+    circuit.add_bundle("Bundle1", 2, 0.3, "ACSR")
+
+    circuit.add_geometry("Triangle", 0, 15, -5, 15, 5, 15)
+
+    circuit.add_transformer("T1", "Bus1", "Bus2", 100, 10, 10)
+
+    circuit.add_transmission_line("L1", "Bus1", "Bus2", "Bundle1", "ACSR", "Triangle", 10)
 
     circuit.calc_ybus()

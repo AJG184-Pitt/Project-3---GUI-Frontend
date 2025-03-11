@@ -5,6 +5,7 @@ from geometry import Geometry
 from transformer import Transformer
 from transmissionline import TransmissionLine
 import numpy as np
+import pandas as pd
 
 class Circuit:
     def __init__(self, name: str):
@@ -45,25 +46,34 @@ class Circuit:
         N = len(self.buses)
 
         # Initialize ybus matrix
-        Ybus = np.zeros((N, N), dtype=complex)
+        Ybus = pd.DataFrame(index=range(N), columns=range(N)).fillna(0 + 0j).infer_objects(copy=False)
 
         # Iterate through components
         for component in list(self.transformers.values()) + list(self.transmission_lines.values()):
-            Yprim = component.yprim()
-            bus1_index = self.buses.index(component.bus1)
-            bus2_index = self.buses.index(component.bus2)
+            Yprim = component.yprim
+            # bus1_index = self.buses[component.bus1]
+            bus1_name = component.bus1.name
+            # bus2_index = self.buses[component.bus2]
+            bus2_name = component.bus2.name
 
-            # Add self-admittances
-            Ybus[bus1_index, bus1_index] += Yprim[0,0]
-            Ybus[bus2_index, bus2_index] += Yprim[1,1]
+            if bus1_name in self.buses and bus2_name in self.buses:
+                # Get indices for buses in Ybus DataFrame
+                bus1_index = list(self.buses.keys()).index(bus1_name)
+                bus2_index = list(self.buses.keys()).index(bus2_name)
 
-            # Mutual admittances
-            Ybus[bus1_index, bus2_index] += Yprim[0,1]
-            Ybus[bus2_index, bus1_index] += Yprim[1,0]
+                # Add self-admittances
+                Ybus.iloc[bus1_index, bus1_index] += Yprim[0, 0]
+                Ybus.iloc[bus2_index, bus2_index] += Yprim[1, 1]
+
+                # Add mutual admittances
+                Ybus.iloc[bus1_index, bus2_index] += Yprim[0, 1]
+                Ybus.iloc[bus2_index, bus1_index] += Yprim[1, 0]
+            else:
+                raise KeyError(f"Buses {bus1_name} or {bus2_name} not found in self.buses.")
 
         for i in range(N):
-            if Ybus[i, i] == 0:
-                raise ValueError(f"Bus {self.buses[i].name} has no self-admittance")
+            if Ybus.iloc[i, i] == 0:
+                raise ValueError(f"Bus {list(self.buses.keys())[i]} has no self-admittance")
 
         self.ybus = Ybus
 
@@ -85,4 +95,5 @@ if __name__ == '__main__':
 
     circuit.calc_ybus()
 
-    print(circuit.calc_ybus())
+    circuit.calc_ybus()
+    print(circuit.ybus)

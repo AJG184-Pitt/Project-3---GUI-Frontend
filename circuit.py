@@ -22,8 +22,8 @@ class Circuit:
         bundle_obj = Bundle(name, num_conductors, spacing, self.conductors[conductor])
         self.bundles[name] = bundle_obj
 
-    def add_bus(self, name, base_kv, bus_type="PQ", vpu=1.0, delta=0.0):
-        bus_obj = Bus(name, base_kv, bus_type, vpu, delta)
+    def add_bus(self, name, base_kv):
+        bus_obj = Bus(name, base_kv)
         self.buses[name] = bus_obj
         
     def add_conductor(self, name, diam, GMR, resistance, ampacity):

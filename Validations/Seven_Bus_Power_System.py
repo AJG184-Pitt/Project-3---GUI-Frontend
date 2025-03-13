@@ -33,4 +33,4 @@ circuit1.add_transmission_line("L5", "Bus5", "Bus6", "B1", "C1", "G1", 10)
 circuit1.add_transmission_line("L6", "Bus4", "Bus5", "B1", "C1", "G1", 35)
 
 circuit1.calc_ybus()
-print(circuit1.ybus)
+circuit1.print_ybus()

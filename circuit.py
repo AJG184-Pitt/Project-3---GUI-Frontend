@@ -77,11 +77,19 @@ class Circuit:
 
         self.ybus = Ybus
 
+    def print_ybus(self):
+        if self.ybus is not None:
+            with pd.option_context('display.max_rows', None, 'display.max_columns', None):
+                print("Y-Bus Matrix")
+                print(self.ybus)
+        else:
+            print("Y-Bus not calculated")
+
 if __name__ == '__main__':
     circuit = Circuit("Test Circuit")
 
-    circuit.add_bus("Bus1", 132, "Slack Bus")
-    circuit.add_bus("Bus2", 33, "Slack Bus")
+    circuit.add_bus("Bus1", 132)
+    circuit.add_bus("Bus2", 33)
 
     circuit.add_conductor("ACSR", 25.76, 0.0111, 0.0891, 780)
 
@@ -96,4 +104,4 @@ if __name__ == '__main__':
     circuit.calc_ybus()
 
     circuit.calc_ybus()
-    print(circuit.ybus)
+    circuit.print_ybus()

@@ -1,5 +1,6 @@
 import numpy as np
 from bus import Bus
+from settings import s
 
 class Transformer:
 
@@ -19,7 +20,7 @@ class Transformer:
         self.yprim = self.calc_matrix()
 
     def calc_impedance(self):
-        self.zpu = self.impedance_percent / 100*self.bus1.s_sys / self.power_rating*np.exp(1j * np.arctan(self.x_over_r_ratio))
+        self.zpu = self.impedance_percent / 100*s.base_power / self.power_rating*np.exp(1j * np.arctan(self.x_over_r_ratio))
         # theta = np.atan(self.x_over_r_ratio)
         # zmag = self.impedance_percent/100
         #

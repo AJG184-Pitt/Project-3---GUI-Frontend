@@ -3,6 +3,7 @@ from bus import Bus
 from conductor import Conductor
 from geometry import Geometry
 from bundle import Bundle
+from settings import s
 
 class TransmissionLine:
 
@@ -18,7 +19,6 @@ class TransmissionLine:
         self.rpu: float
         self.xseries : float
         self.xpu: float
-        self.f = 60
         self.zpu, self.ypu = self.calc_series()
         self.bpu : float
         self.bpu = self.calc_admittance()
@@ -26,8 +26,8 @@ class TransmissionLine:
 
     def calc_series(self):
         self.rseries = (self.conductor.resistance/self.bundle.num_conductors)*self.length
-        self.xseries = (2 * np.pi * self.f) * (2 * 10 ** -7) * np.log(self.geometry.Deq/self.bundle.DSL) * 1609.34 * self.length
-        z_base = self.bus1.base_kv**2/self.bus1.s_sys
+        self.xseries = (2 * np.pi * s.frequency) * (2 * 10 ** -7) * np.log(self.geometry.Deq/self.bundle.DSL) * 1609.34 * self.length
+        z_base = self.bus1.base_kv**2/s.base_power
 
         self.rpu = self.rseries/z_base
         self.xpu = self.xseries/z_base
@@ -36,8 +36,8 @@ class TransmissionLine:
         return self.zpu, self.ypu
 
     def calc_admittance(self):
-        bshunt = (2 * np.pi * self.f) * ((2 * np.pi * 8.854 * 10 ** -12)/(np.log(self.geometry.Deq/self.bundle.DSC))) * 1609.34 * self.length
-        y_base = self.bus1.s_sys/self.bus1.base_kv**2
+        bshunt = (2 * np.pi * s.frequency) * ((2 * np.pi * 8.854 * 10 ** -12)/(np.log(self.geometry.Deq/self.bundle.DSC))) * 1609.34 * self.length
+        y_base = s.base_power/self.bus1.base_kv**2
         self.bpu = bshunt/ y_base
         return self.bpu
 

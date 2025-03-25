@@ -51,9 +51,7 @@ class Circuit:
         # Iterate through components
         for component in list(self.transformers.values()) + list(self.transmission_lines.values()):
             Yprim = component.yprim
-            # bus1_index = self.buses[component.bus1]
             bus1_name = component.bus1.name
-            # bus2_index = self.buses[component.bus2]
             bus2_name = component.bus2.name
 
             if bus1_name in self.buses and bus2_name in self.buses:

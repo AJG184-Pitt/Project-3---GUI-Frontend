@@ -40,27 +40,77 @@ class Conductor {
 }
 
 class Generator {
-
+    +str name
+    +Bus bus
+    +float voltage_setpoint
+    +float mw_setpoint
 }
 
 class Geometry {
+    +str name
+    +float xa
+    +float ya
+    +float xb
+    +float yb
+    +float xc
+    +float yc
 
+    +calc_Deq()
 }
 
 class Load {
-
+    +str name
+    +Bus bus
+    +float real_power
+    +float reactive_power
 }
 
 class Settings {
-
+    -int frequency
+    -int base_power
 }
 
 class Transformer {
+    +str name
+    +Bus bus1
+    +Bus bus2
+    +float power_rating
+    +float impedance_percent
+    +float x_over_r_ratio
+    -float xpu
+    -float rpu
+    -float xpu_xfmr
+    -float rpu_xfmr
+    -float zpu
+    -float ypu
+    -float yprim
 
+    +calc_impedance()
+    +calc_admittance()
+    +calc_matrix()
 }
 
 class TransmissionLine {
+    +str name
+    +Bus bus1
+    +Bus bus2
+    +Bundle bundle
+    +Conductor conductor 
+    +Geometry geometry 
+    +float length
+    -float rseries
+    -float rpu
+    -float xseries
+    -float xpu
+    -int f
+    -float zpu
+    -float ypu
+    -float bpu
+    -float yprim
 
+    +calc_series()
+    +calc_admittance()
+    +calc_matrix()
 }
 
 Circuit --> Bundle

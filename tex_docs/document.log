@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.27 (TeX Live 2025) (preloaded format=pdflatex 2025.3.22)  25 MAR 2025 08:15
+This is pdfTeX, Version 3.141592653-2.6-1.40.27 (TeX Live 2025) (preloaded format=pdflatex 2025.3.22)  25 MAR 2025 08:19
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -72,19 +72,20 @@ L3 programming layer <2025-01-18>
  ***********
  ) 
 Here is how much of TeX's memory you used:
- 522 strings out of 473189
- 9662 string characters out of 5719958
- 396105 words of memory out of 5000000
- 23837 multiletter control sequences out of 15000+600000
- 568461 words of font info for 54 fonts, out of 8000000 for 9000
+ 526 strings out of 473189
+ 9695 string characters out of 5719958
+ 398111 words of memory out of 5000000
+ 23838 multiletter control sequences out of 15000+600000
+ 571771 words of font info for 58 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
- 35i,6n,50p,160b,198s stack positions out of 10000i,1000n,20000p,200000b,200000s
+ 35i,6n,50p,227b,197s stack positions out of 10000i,1000n,20000p,200000b,200000s
 <c:/texlive/2025/texmf-dist/fonts/type1/urw/times/utmb8a.pfb><c:/texlive/2025
-/texmf-dist/fonts/type1/urw/times/utmr8a.pfb>
-Output written on document.pdf (1 page, 21539 bytes).
+/texmf-dist/fonts/type1/urw/times/utmr8a.pfb><c:/texlive/2025/texmf-dist/fonts/
+type1/urw/times/utmri8a.pfb>
+Output written on document.pdf (1 page, 34315 bytes).
 PDF statistics:
- 19 PDF objects out of 1000 (max. 8388607)
- 11 compressed objects within 1 object stream
+ 24 PDF objects out of 1000 (max. 8388607)
+ 14 compressed objects within 1 object stream
  0 named destinations out of 1000 (max. 500000)
  1 words of extra memory for PDF output out of 10000 (max. 10000000)
 

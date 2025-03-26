@@ -21,8 +21,10 @@
 	This class inserts the busses needed to build circuit. The class is designed such that any amount of busses can be added to the circuit and will be properly classified into PV, PQ, or slack busses
 	
 	\subsection{Transformer}
+	If two busses are set to differing voltage values this class inserts and calculates the necessary transformer equations to change the voltage of the system from bus A to the designated voltage level of bus B
 	
 	\subsection{Transmission Line}
+	When two busses of the same value need to be connected this class calculates the necessary electrical properties to insert a transmission line between the two busses.
 	
 	\subsection{Conductor}
 	Since the ACSR conductor type is used this class collects all the parameters about the conductors.
@@ -36,23 +38,20 @@
 	\subsection{Circuit}
 	This class acts as the main source of controlling the flow of power throughout the system. It calls other methods and utilizes them to create objects and insert values for power flow analysis.
 	
-	\dots
+	\subsection{Seven Bus Power System}
+	This class has all the input data about the circuit that is built and analyzed.
 	
 	\section{Equations Used for Power Calculations}
 	
 	\section{Example Problem with Solution}
 	\noindent
-	Transformer stuff:
+	Transformer Impedance: $Z_{pu} = Z_\% / 100 * S_{base} / S_{transformer} * \angle{\theta}$
 	
 	\noindent
-	Impedance: $Z = V_{sc} / I_{sc}$
+	Transformer Admittance: $Y_{pu} = 1 / Z_{pu}$
 	
 	\noindent
-	$R = P_{sc} / I_{sc}^{2}$
-	
-	\noindent
-	Admittance: $X = \sqrt{Z^{2} - R^{2}}$
-	
-	
-	
+	Transformer Y-Bus Matrix: [ $Y_{Bus}$ ] = [$Y_{11}$ $-Y_{12}$]
+
+	\hspace{141pt}[$-Y_{21}$ $Y_{22}$]	
 \end{document}

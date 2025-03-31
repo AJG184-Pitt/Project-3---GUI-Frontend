@@ -42,38 +42,66 @@ class Circuit:
         transmission_line_obj = TransmissionLine(name, self.buses[bus1], self.buses[bus2], self.bundles[bundle], self.conductors[conductor], self.geometries[geometry], length)
         self.transmission_lines[name] = transmission_line_obj
 
+    # def calc_ybus(self):
+    #     N = len(self.buses)
+    #
+    #     # Initialize ybus matrix
+    #     Ybus = pd.DataFrame(index=range(N), columns=range(N)).fillna(0 + 0j).infer_objects(copy=False)
+    #
+    #     # Iterate through components
+    #     for component in list(self.transformers.values()) + list(self.transmission_lines.values()):
+    #         Yprim = component.yprim
+    #         # bus1_index = self.buses[component.bus1]
+    #         bus1_name = component.bus1.name
+    #         # bus2_index = self.buses[component.bus2]
+    #         bus2_name = component.bus2.name
+    #
+    #         if bus1_name in self.buses and bus2_name in self.buses:
+    #             # Get indices for buses in Ybus DataFrame
+    #             bus1_index = list(self.buses.keys()).index(bus1_name)
+    #             bus2_index = list(self.buses.keys()).index(bus2_name)
+    #
+    #             # Add self-admittances
+    #             Ybus.iloc[bus1_index, bus1_index] += Yprim[0, 0]
+    #             Ybus.iloc[bus2_index, bus2_index] += Yprim[1, 1]
+    #
+    #             # Add mutual admittances
+    #             Ybus.iloc[bus1_index, bus2_index] += Yprim[0, 1]
+    #             Ybus.iloc[bus2_index, bus1_index] += Yprim[1, 0]
+    #         else:
+    #             raise KeyError(f"Buses {bus1_name} or {bus2_name} not found in self.buses.")
+    #
+    #     for i in range(N):
+    #         if Ybus.iloc[i, i] == 0:
+    #             raise ValueError(f"Bus {list(self.buses.keys())[i]} has no self-admittance")
+    #
+    #     self.ybus = Ybus
+
     def calc_ybus(self):
-        N = len(self.buses)
+        bus_names = list(self.buses.keys())  # Get bus names
+        N = len(bus_names)
 
-        # Initialize ybus matrix
-        Ybus = pd.DataFrame(index=range(N), columns=range(N)).fillna(0 + 0j).infer_objects(copy=False)
+        # Initialize Ybus matrix with bus names
+        Ybus = pd.DataFrame(index=bus_names, columns=bus_names).fillna(0 + 0j).infer_objects(copy=False)
 
-        # Iterate through components
         for component in list(self.transformers.values()) + list(self.transmission_lines.values()):
             Yprim = component.yprim
-            # bus1_index = self.buses[component.bus1]
             bus1_name = component.bus1.name
-            # bus2_index = self.buses[component.bus2]
             bus2_name = component.bus2.name
 
-            if bus1_name in self.buses and bus2_name in self.buses:
-                # Get indices for buses in Ybus DataFrame
-                bus1_index = list(self.buses.keys()).index(bus1_name)
-                bus2_index = list(self.buses.keys()).index(bus2_name)
-
-                # Add self-admittances
-                Ybus.iloc[bus1_index, bus1_index] += Yprim[0, 0]
-                Ybus.iloc[bus2_index, bus2_index] += Yprim[1, 1]
-
-                # Add mutual admittances
-                Ybus.iloc[bus1_index, bus2_index] += Yprim[0, 1]
-                Ybus.iloc[bus2_index, bus1_index] += Yprim[1, 0]
+            if bus1_name in bus_names and bus2_name in bus_names:
+                # Use bus names directly
+                Ybus.loc[bus1_name, bus1_name] += Yprim[0, 0]
+                Ybus.loc[bus2_name, bus2_name] += Yprim[1, 1]
+                Ybus.loc[bus1_name, bus2_name] += Yprim[0, 1]
+                Ybus.loc[bus2_name, bus1_name] += Yprim[1, 0]
             else:
                 raise KeyError(f"Buses {bus1_name} or {bus2_name} not found in self.buses.")
 
-        for i in range(N):
-            if Ybus.iloc[i, i] == 0:
-                raise ValueError(f"Bus {list(self.buses.keys())[i]} has no self-admittance")
+        # Check for isolated buses
+        for bus in bus_names:
+            if Ybus.loc[bus, bus] == 0:
+                raise ValueError(f"Bus {bus} has no self-admittance")
 
         self.ybus = Ybus
 

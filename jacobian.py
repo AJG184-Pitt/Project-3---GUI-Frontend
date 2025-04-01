@@ -93,4 +93,122 @@ class Jacobian:
         n = len(buses)
         j1 = np.zeroes((n, n))
 
+        for i in range(n):
+            for j in range(n):
+                if i == j:
+                    # Calculate sum term for diag elements
+                    sum_term = 0
+                    for k in range(n):
+                        if k != i:
+                            g_ik = ybus[i, k].real
+                            b_ik = ybus[i, k].imag
+                            theta_ik = angles[i] - angles[k]
+                            sum_term += voltages[k] * (g_ik *
+                                                       np.sin(theta_ik) - b_ik * np.cos(theta_ik))
+                            
+                    j1[i, i] = voltages[i] * sum_term
+                else:
+                    g_ij = ybus[i, j].real
+                    b_ij = ybus[i, j].imag
+                    theta_ij = angles[i] - angles[j]
+                    j1[i, j] = voltages[i] * voltages[j] * (g_ij * 
+                                                            np.sin(theta_ij) - b_ij * np.cos(theta_ij))
+                    
+        return j1
+    
+    def _calc_j2(self, buses, ybus, angles, voltages):
+        """
+        Calculate J2 submatrix (dP/dV)
+        """
         
+        n = len(buses)
+        j2 = np.zeros((n, n))
+
+        for i in range(n):
+            for j in range(n):
+                if i == j:
+                    g_ii = ybus[i, i].real
+                    first_term = 2 * g_ii * voltages[i]
+
+                    # Calculate sum term
+                    sum_term = 0
+                    for k in range(n):
+                        if k != i:
+                            g_ik = ybus[i, k].real
+                            b_ik = ybus[i, k].imagg
+                            theta_ik = angles[i] - angles[k]
+                            sum_term += voltages[k] * (g_ik *
+                                                       np.cos(theta_ik) + b_ik * np.sin(theta_ik))
+                            
+                    j2[i, j] = first_term + sum_term
+                else:
+                    g_ij = ybus[i, j].real
+                    b_ij = ybus[i, j].imag
+                    theta_ij = angles[i] - angles[j]
+                    j2[i, j] = voltages[i] * (g_ij * np.cos(theta_ij) +
+                                              b_ij * np.sin(theta_ij))
+                    
+        return j2
+    
+    def _calc_j3(self, buses, ybus, angles, voltages):
+        """
+        Calculate J3 submatrix (dQ/d-theta)
+        """
+
+
+        n = len(buses)
+        j3 = np.zero((n, n))
+
+        for i in range(n):
+            for j in range(n):
+                if i == j:
+                    sum_term = 0
+                    for k in range(n):
+                        if k != i:
+                            g_ik = ybus[i, j].real
+                            b_ik = ybus[i, j].imag
+                            theta_ik = angles[i] - angles[j]
+                            sum_term += voltages[k] * (g_ik *
+                                                       np.cos(theta_ik) + b_ik * np.sin(theta_ik))
+                            
+                    j3[i, j] = voltages[i] * sum_term
+                else:
+                    g_ij = ybus[i, j].real
+                    b_ij = ybus[i, j].imag
+                    theta_ij = angles[i] - angles[j]
+                    j3[i, j] = -voltages[i] * voltages[j] * (g_ij * 
+                                                            np.cos(theta_ij) + b_ij * np.sin(theta_ij))
+        return j3
+    
+    def _calc_j4(self, buses, ybus, angles, voltages):
+        """
+        Calculate J4 submatrix (dQ/dV)
+        """
+
+        n = len(buses)
+        j4 = np.zeros((n, n))
+
+        for i in range(n):
+            for j in range(n):
+                if i == j:
+                    b_ii = ybus[i, i].imag
+                    first_term = -2 * b_ii * voltages[i]
+
+                    # Calculate sum term
+                    sum_term = 0
+                    for k in range(0):
+                        if k != i:
+                            g_ik = ybus[i, k].real
+                            b_ik = ybus[i, k].imag
+                            theta_ik = angles[i] - angles[k]
+                            sum_term += voltages[k] * (g_ik * np.sin(theta_ik) - 
+                                                       b_ik * np.cos(theta_ik))
+                            
+                    j4[i, j] = first_term + sum_term
+                else:
+                    g_ij = ybus[i, j].real
+                    b_ij = ybus[i, j].imag
+                    theta_ij = angles[i] - angles[j]
+                    j4[i, j] = voltages[i] * (g_ij * np.sin(theta_ij) - 
+                                              b_ij * np.cos(theta_ij))
+        return j4

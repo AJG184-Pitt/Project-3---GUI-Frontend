@@ -1,6 +1,8 @@
 import numpy as np
 from enum import Enum
 
+from bus import Bus
+
 class BusType:
     SLACK = 1
     PV = 2
@@ -10,7 +12,7 @@ class Jacobian:
     def __init__(self):
         pass
 
-    def calc_jacobian(self, buses, ybus, angles, voltages):
+    def calc_jacobian(self, buses: Bus, ybus, angles, voltages):
         """
         Calculate the full Jacobian matrix for Newton-Raphson power flow
         """
@@ -18,8 +20,8 @@ class Jacobian:
         n = len(buses)
 
         # Count different bus types
-        n_pv = sum(1 for bus in buses if bus.type == BusType.PV)
-        n_pq = sum(1 for bus in buses if bus.type == BusType.PQ)
+        n_pv = sum(1 for bus in buses if bus.bus_type == BusType.PV)
+        n_pq = sum(1 for bus in buses if bus.bus_type == BusType.PQ)
 
         # Determine Jacobian dimensions
         j_size = 2*n - 2 - n_pv
@@ -41,9 +43,9 @@ class Jacobian:
         q_index = []
 
         for i, bus in enumerate(buses):
-            if bus.type != BusType.SLACK:
+            if bus.bus_type != BusType.SLACK:
                 p_index.append(i)
-            if bus.type == BusType.PQ:
+            if bus.bus_type == BusType.PQ:
                 q_index.append(i)
 
         # Create mapping between bus indicies and corresponding theta,V columns
@@ -51,9 +53,9 @@ class Jacobian:
         v_index = []
 
         for i, bus in enumerate(buses):
-            if bus.type != BusType.SLACK:
+            if bus.bus_type != BusType.SLACK:
                 theta_index.append(i)
-            if bus.type == BusType.PQ:
+            if bus.bus_type == BusType.PQ:
                 v_index.append(i)
         
         # Initialize final index
@@ -91,7 +93,7 @@ class Jacobian:
         """
 
         n = len(buses)
-        j1 = np.zeroes((n, n))
+        j1 = np.zeros((n, n))
 
         for i in range(n):
             for j in range(n):
@@ -135,7 +137,7 @@ class Jacobian:
                     for k in range(n):
                         if k != i:
                             g_ik = ybus[i, k].real
-                            b_ik = ybus[i, k].imagg
+                            b_ik = ybus[i, k].imag
                             theta_ik = angles[i] - angles[k]
                             sum_term += voltages[k] * (g_ik *
                                                        np.cos(theta_ik) + b_ik * np.sin(theta_ik))
@@ -157,7 +159,7 @@ class Jacobian:
 
 
         n = len(buses)
-        j3 = np.zero((n, n))
+        j3 = np.zeros((n, n))
 
         for i in range(n):
             for j in range(n):
@@ -212,3 +214,35 @@ class Jacobian:
                     j4[i, j] = voltages[i] * (g_ij * np.sin(theta_ij) - 
                                               b_ij * np.cos(theta_ij))
         return j4
+
+if __name__ == '__main__':
+    buses = [
+        Bus("Bus 1", 1, BusType.SLACK),
+        Bus("Bus 1", 2, BusType.PV),
+        Bus("Bus 1", 3, BusType.PQ),
+    ]
+    
+    # Create a sample Ybus matrix for a 3-bus system
+    # This should match the Ybus from Powerworld for your validation
+    ybus = np.array([
+        [complex(1.5, -4.0), complex(-0.5, 1.0), complex(-1.0, 3.0)],
+        [complex(-0.5, 1.0), complex(1.0, -3.0), complex(-0.5, 2.0)],
+        [complex(-1.0, 3.0), complex(-0.5, 2.0), complex(1.5, -5.0)]
+    ])
+    
+    # Set initial voltage angles (radians) and magnitudes (per unit)
+    # These will typically come from a flat start or previous iteration
+    angles = np.array([0.0, 0.0, 0.0])  # Flat start
+    voltages = np.array([1.0, 1.0, 1.0])  # Flat start
+    
+    # Calculate the Jacobian
+    jacobian = Jacobian()
+    J = jacobian.calc_jacobian(buses, ybus, angles, voltages)
+    
+    print("Jacobian Matrix:")
+    print(J)
+    
+    # Expected size for this system (2N-2-n_pv) x (2N-2-n_pv)
+    # 3 buses - 1 slack - 0 PV reactive power rows = 5x5 matrix
+    expected_size = (2*len(buses) - 2 - 1)
+    print(f"Expected size: {expected_size}x{expected_size}, Actual size: {J.shape}")

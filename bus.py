@@ -3,13 +3,13 @@ import warnings
 class Bus:
     bus_count = 0
 
-    def __init__(self, name: str, base_kv: float):
+    def __init__(self, name: str, base_kv: float, bus_type='Slack Bus'):
         self.name = name
         self.base_kv = base_kv
         self.index = Bus.bus_count
         Bus.bus_count += 1
         self.s_sys = 100
-        self.bus_type = 'Slack Bus'
+        self.bus_type = bus_type
         self.vpu = 1.0
         self.delta = 0.0
 

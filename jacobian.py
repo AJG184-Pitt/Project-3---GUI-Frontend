@@ -1,7 +1,4 @@
 import numpy as np
-from enum import Enum
-
-from bus import Bus
 
 class BusType:
     SLACK = 1
@@ -18,35 +15,40 @@ class Jacobian:
         
         Parameters:
             buses: List of Bus objects
-            ybus: Complex admittance matrix
+            ybus: Complex admittance matrix (can be numpy array or pandas DataFrame)
             angles: Current voltage angles (radians)
             voltages: Current voltage magnitudes (per unit)
             
         Returns:
             J: The complete Jacobian matrix with proper 2x2 block structure
-            
-        Implementation notes:
-        - This follows the structure defined in the milestone document
-        - Properly excludes slack bus from calculations
-        - Only includes P equations for PV buses, not Q equations
-        - Jacobian has the structure:
-          J = | J1  J2 |
-              | J3  J4 |
         """
+        # Convert pandas DataFrame to numpy array if needed
+        if hasattr(ybus, 'values'):
+            ybus = ybus.values
+        
+        # Map string bus types to numeric types
+        bus_type_map = {
+            "Slack Bus": BusType.SLACK,
+            "PV Bus": BusType.PV,
+            "PQ Bus": BusType.PQ
+        }
+        
         n = len(buses)
         
         # Create mapping between bus indices and their variables
-        # This helps us keep track of which buses contribute to which parts of the Jacobian
         p_index = []     # Buses that contribute to P equations (all except slack)
         q_index = []     # Buses that contribute to Q equations (only PQ buses)
         theta_index = [] # Buses whose theta is a variable (all except slack)
         v_index = []     # Buses whose V is a variable (only PQ buses)
         
         for i, bus in enumerate(buses):
-            if bus.bus_type != BusType.SLACK:
+            # Convert string bus type to numeric type if needed
+            bus_type = bus_type_map.get(bus.bus_type, bus.bus_type)
+            
+            if bus_type != BusType.SLACK:
                 p_index.append(i)
                 theta_index.append(i)
-            if bus.bus_type == BusType.PQ:
+            if bus_type == BusType.PQ:
                 q_index.append(i)
                 v_index.append(i)
         
@@ -59,12 +61,8 @@ class Jacobian:
         # Calculate the total Jacobian size
         j_size = n_p + n_q
         
-        # Verify the dimensions match the expected formula 
-        # The correct size is (n-n_slack) + n_pq, which is the sum of:
-        # - P equations: n - n_slack (all buses except slack)
-        # - Q equations: n_pq (only PQ buses)
-        n_slack = sum(1 for bus in buses if bus.bus_type == BusType.SLACK)
-        n_pv = sum(1 for bus in buses if bus.bus_type == BusType.PV)
+        # Verify the dimensions match the expected formula
+        n_slack = sum(1 for bus in buses if bus_type_map.get(bus.bus_type, bus.bus_type) == BusType.SLACK)
         n_pq = len(q_index)
         
         expected_size = (n - n_slack) + n_pq
@@ -76,10 +74,10 @@ class Jacobian:
         J = np.zeros((j_size, j_size))
         
         # Calculate each submatrix using the correct partial derivatives
-        J1 = self._calc_j1(buses, ybus, angles, voltages, p_index, theta_index)
-        J2 = self._calc_j2(buses, ybus, angles, voltages, p_index, v_index)
-        J3 = self._calc_j3(buses, ybus, angles, voltages, q_index, theta_index)
-        J4 = self._calc_j4(buses, ybus, angles, voltages, q_index, v_index)
+        J1 = self._calc_j1(buses, ybus, angles, voltages, p_index, theta_index, bus_type_map)
+        J2 = self._calc_j2(buses, ybus, angles, voltages, p_index, v_index, bus_type_map)
+        J3 = self._calc_j3(buses, ybus, angles, voltages, q_index, theta_index, bus_type_map)
+        J4 = self._calc_j4(buses, ybus, angles, voltages, q_index, v_index, bus_type_map)
         
         # Fill the Jacobian with the submatrices
         # J1 (dP/dδ) - upper left block
@@ -96,9 +94,11 @@ class Jacobian:
         
         return J
     
-    def _calc_j1(self, buses, ybus, angles, voltages, p_index, theta_index):
+    def _calc_j1(self, buses, ybus, angles, voltages, p_index, theta_index, bus_type_map):
         """
         Calculate J1 submatrix (dP/dδ)
+        
+        This forms the upper left part of the Jacobian matrix.
         """
         n_p = len(p_index)
         n_theta = len(theta_index)
@@ -126,7 +126,7 @@ class Jacobian:
         
         return j1
     
-    def _calc_j2(self, buses, ybus, angles, voltages, p_index, v_index):
+    def _calc_j2(self, buses, ybus, angles, voltages, p_index, v_index, bus_type_map):
         """
         Calculate J2 submatrix (dP/dV)
         
@@ -164,9 +164,11 @@ class Jacobian:
         
         return j2
     
-    def _calc_j3(self, buses, ybus, angles, voltages, q_index, theta_index):
+    def _calc_j3(self, buses, ybus, angles, voltages, q_index, theta_index, bus_type_map):
         """
         Calculate J3 submatrix (dQ/dδ)
+        
+        This forms the lower left part of the Jacobian matrix.
         """
         n_q = len(q_index)
         n_theta = len(theta_index)
@@ -194,9 +196,11 @@ class Jacobian:
         
         return j3
     
-    def _calc_j4(self, buses, ybus, angles, voltages, q_index, v_index):
+    def _calc_j4(self, buses, ybus, angles, voltages, q_index, v_index, bus_type_map):
         """
         Calculate J4 submatrix (dQ/dV)
+        
+        This forms the lower right part of the Jacobian matrix.
         """
         n_q = len(q_index)
         n_v = len(v_index)
@@ -230,52 +234,57 @@ class Jacobian:
         
         return j4
 
-
-if __name__ == '__main__':
-    buses = [
-        Bus("Bus 1", 1, BusType.SLACK),
-        Bus("Bus 2", 2, BusType.PV),
-        Bus("Bus 3", 3, BusType.PQ),
-    ]
+# Extension method for the Circuit class to calculate Jacobian
+def calc_jacobian_for_circuit(circuit):
+    """
+    Calculate the Jacobian matrix for a Circuit object
     
-    # Create a sample Ybus matrix for a 3-bus system
-    # This should match the Ybus from Powerworld for your validation
-    ybus = np.array([
+    Parameters:
+        circuit: Circuit object with buses and Ybus
+    
+    Returns:
+        J: The Jacobian matrix
+    """
+    # Make sure ybus has been calculated first
+    if circuit.ybus is None:
+        circuit.calc_ybus()
+    
+    # Extract bus data
+    buses = list(circuit.buses.values())
+    angles = np.array([bus.delta for bus in buses])
+    voltages = np.array([bus.vpu for bus in buses])
+    
+    # Create Jacobian instance and calculate
+    jacobian = Jacobian()
+    J = jacobian.calc_jacobian(buses, circuit.ybus, angles, voltages)
+    return J
+
+
+# Example usage with your Circuit class:
+if __name__ == '__main__':
+    from circuit import Circuit
+    from bus import Bus
+    
+    # Create a test circuit
+    circuit = Circuit("Test Circuit")
+    
+    # Add buses with different types
+    bus1 = Bus("Bus1", 132, "Slack Bus")
+    bus2 = Bus("Bus2", 132, "PV Bus")
+    bus3 = Bus("Bus3", 33, "PQ Bus")
+    
+    circuit.buses = {"Bus1": bus1, "Bus2": bus2, "Bus3": bus3}
+    
+    # Create a sample Ybus matrix
+    import pandas as pd
+    circuit.ybus = pd.DataFrame([
         [complex(1.5, -4.0), complex(-0.5, 1.0), complex(-1.0, 3.0)],
         [complex(-0.5, 1.0), complex(1.0, -3.0), complex(-0.5, 2.0)],
         [complex(-1.0, 3.0), complex(-0.5, 2.0), complex(1.5, -5.0)]
     ])
     
-    # Set initial voltage angles (radians) and magnitudes (per unit)
-    # These will typically come from a flat start or previous iteration
-    angles = np.array([0.0, 0.0, 0.0])  # Flat start
-    voltages = np.array([1.0, 1.0, 1.0])  # Flat start
-    
     # Calculate the Jacobian
-    jacobian = Jacobian()
-    J = jacobian.calc_jacobian(buses, ybus, angles, voltages)
+    J = calc_jacobian_for_circuit(circuit)
     
     print("Jacobian Matrix:")
-    print(np.round(J, 4))  # Round to 4 decimal places for readability
-    
-    # Expected size calculation
-    n = len(buses)  # Total number of buses
-    n_slack = sum(1 for bus in buses if bus.bus_type == BusType.SLACK)  # Number of slack buses
-    n_pv = sum(1 for bus in buses if bus.bus_type == BusType.PV)  # Number of PV buses
-    n_pq = sum(1 for bus in buses if bus.bus_type == BusType.PQ)  # Number of PQ buses
-    
-    # The correct size calculation:
-    # P equations: (n - n_slack) = number of non-slack buses
-    # Q equations: n_pq = number of PQ buses
-    # Total equations = (n - n_slack) + n_pq
-    # Which simplifies to: n - n_slack + n_pq
-    expected_size = (n - n_slack) + n_pq
-    
-    print(f"Bus Configuration: {n_slack} Slack, {n_pv} PV, {n_pq} PQ buses")
-    print(f"Total Jacobian size: {expected_size}x{expected_size}")
-    print(f"Actual size: {J.shape}")
-    
-    # Alternative calculation using the formula from milestone document
-    # (2N-2-number of PV buses)
-    alt_expected_size = 2*n - 2 - n_pv
-    print(f"Size from milestone formula: {alt_expected_size}x{alt_expected_size}")
+    print(np.round(J, 4))

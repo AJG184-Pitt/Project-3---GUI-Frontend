@@ -16,6 +16,37 @@ class PowerFlow:
         """Initialize the PowerFlow solver."""
         pass
     
+    def solve_circuit(self, circuit, tol=0.001, max_iter=50):
+        """
+        Solve the power flow problem for a Circuit object using the Newton-Raphson method.
+        
+        Parameters:
+        -----------
+        circuit : Circuit
+            Circuit object containing buses and components
+        tol : float, optional
+            Convergence tolerance, default is 0.001
+        max_iter : int, optional
+            Maximum number of iterations, default is 50
+            
+        Returns:
+        --------
+        dict
+            Dictionary containing the solved voltages, angles, iterations, and convergence status
+        """
+        # Make sure Ybus is calculated
+        if circuit.ybus is None:
+            circuit.calc_ybus()
+            
+        # Extract buses from circuit
+        buses = list(circuit.buses.values())
+        
+        # Convert Pandas DataFrame to NumPy array if needed
+        ybus = circuit.ybus.values if hasattr(circuit.ybus, 'values') else circuit.ybus
+        
+        # Call the main solve method
+        return self.solve(buses, ybus, tol, max_iter)
+    
     def solve(self, buses, ybus, tol=0.001, max_iter=50):
         """
         Solve the power flow problem using the Newton-Raphson method.
@@ -252,33 +283,56 @@ class PowerFlow:
         return J
 
 if __name__ == "__main__":
-    # Example usage:
+    # Example usage with Circuit class:
+    from circuit import Circuit
     from bus import Bus
     import numpy as np
     
-    # Create buses
-    bus1 = Bus("Bus1", 132, "Slack Bus")
-    bus1.vpu = 1.05
+    # Create a test circuit
+    circuit = Circuit("Test Power Flow")
     
-    bus2 = Bus("Bus2", 132, "PV Bus")
-    bus2.vpu = 1.02
+    # Add buses with different types
+    circuit.add_bus("Bus1", 132)
+    circuit.buses["Bus1"].bus_type = "Slack Bus"
+    circuit.buses["Bus1"].vpu = 1.05
     
-    bus3 = Bus("Bus3", 33, "PQ Bus")
+    circuit.add_bus("Bus2", 132)
+    circuit.buses["Bus2"].bus_type = "PV Bus"
+    circuit.buses["Bus2"].vpu = 1.02
     
-    buses = [bus1, bus2, bus3]
+    circuit.add_bus("Bus3", 33)
+    circuit.buses["Bus3"].bus_type = "PQ Bus"
     
-    # Create a simple Ybus
-    ybus = np.array([
+    # Add components to create a valid circuit
+    # For this example, we'll create a simple Ybus manually
+    # In a real scenario, you would add transformers and transmission lines
+    
+    # Create a simple Ybus and assign it to the circuit
+    ybus_data = [
         [complex(10, -30), complex(-5, 15), complex(-5, 15)],
         [complex(-5, 15), complex(10, -30), complex(-5, 15)],
         [complex(-5, 15), complex(-5, 15), complex(10, -30)]
-    ])
+    ]
+    import pandas as pd
+    circuit.ybus = pd.DataFrame(ybus_data)
     
     # Create and run the solver
     solver = PowerFlow()
-    results = solver.solve(buses, ybus)
+    results = solver.solve_circuit(circuit)
     
     # Print results
-    print("Solved voltages:")
-    for i, bus in enumerate(buses):
-        print(f"{bus.name}: {bus.vpu:.4f} ∠{np.degrees(bus.delta):.2f}°")
+    print("\nNewton-Raphson Power Flow Solution")
+    print("---------------------------------")
+    print(f"Converged: {results['converged']}")
+    print(f"Iterations: {results['iterations']}")
+    
+    print("\nBus Voltages:")
+    for bus_name, bus in circuit.buses.items():
+        print(f"{bus_name}: {bus.vpu:.4f} ∠{np.degrees(bus.delta):.2f}°")
+    
+    if 'p_calc' in results and 'q_calc' in results:
+        print("\nCalculated Power Flows:")
+        for i, (bus_name, bus) in enumerate(circuit.buses.items()):
+            p = results['p_calc'][i]
+            q = results['q_calc'][i]
+            print(f"{bus_name}: P = {p:.4f} p.u., Q = {q:.4f} p.u.")

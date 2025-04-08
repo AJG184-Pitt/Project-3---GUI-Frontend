@@ -19,6 +19,7 @@ class Solution:
         self.Q = self.calc_Qx()
         self.x = self.initialize_x()
         self.y = self.initialize_y()
+        self.mismatch = self.calc_mismatch()
 
     #power injection
     def start(self):
@@ -82,3 +83,5 @@ class Solution:
         y = np.concatenate(real_power_vector, reactive_power_vector)
         return y
 
+    def calc_mismatch(self):
+        return self.y-self.x

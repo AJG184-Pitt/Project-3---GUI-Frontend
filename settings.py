@@ -1,11 +1,13 @@
+
+
 class Settings:
 
-    def __init__(self):
+    def __init__(self, ):
         self.frequency = 60
         self.base_power = 100
 
-s = Settings()
 
+s = Settings()
 if __name__ == '__main__':
 
     settings = Settings()

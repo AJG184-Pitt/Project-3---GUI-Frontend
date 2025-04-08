@@ -1,4 +1,7 @@
 import numpy as np
+import pandas as pd
+from circuit import Circuit
+from bus import Bus
 
 class BusType:
     SLACK = 1
@@ -262,9 +265,6 @@ def calc_jacobian_for_circuit(circuit):
 
 # Example usage with your Circuit class:
 if __name__ == '__main__':
-    from circuit import Circuit
-    from bus import Bus
-    
     # Create a test circuit
     circuit = Circuit("Test Circuit")
     
@@ -276,7 +276,6 @@ if __name__ == '__main__':
     circuit.buses = {"Bus1": bus1, "Bus2": bus2, "Bus3": bus3}
     
     # Create a sample Ybus matrix
-    import pandas as pd
     circuit.ybus = pd.DataFrame([
         [complex(1.5, -4.0), complex(-0.5, 1.0), complex(-1.0, 3.0)],
         [complex(-0.5, 1.0), complex(1.0, -3.0), complex(-0.5, 2.0)],
@@ -284,7 +283,6 @@ if __name__ == '__main__':
     ])
     
     # Calculate the Jacobian
-    J = calc_jacobian_for_circuit(circuit)
-    
+    J = calc_jacobian_for_circuit(circuit)    
     print("Jacobian Matrix:")
     print(np.round(J, 4))

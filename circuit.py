@@ -4,6 +4,7 @@ from conductor import Conductor
 from geometry import Geometry
 from transformer import Transformer
 from transmissionline import TransmissionLine
+from load import Load
 import numpy as np
 import pandas as pd
 
@@ -41,6 +42,10 @@ class Circuit:
     def add_transmission_line(self, name, bus1, bus2, bundle, conductor, geometry, length):
         transmission_line_obj = TransmissionLine(name, self.buses[bus1], self.buses[bus2], self.bundles[bundle], self.conductors[conductor], self.geometries[geometry], length)
         self.transmission_lines[name] = transmission_line_obj
+
+    def add_load(self, name, bus, real_power, reactive_power):
+        load_obj = Load(name, self.bus[bus], real_power, reactive_power)
+        self.load[name] = load_obj
 
     # def calc_ybus(self):
     #     N = len(self.buses)
@@ -112,6 +117,7 @@ class Circuit:
                 print(self.ybus)
         else:
             print("Y-Bus not calculated")
+
 
 if __name__ == '__main__':
     circuit = Circuit("Test Circuit")

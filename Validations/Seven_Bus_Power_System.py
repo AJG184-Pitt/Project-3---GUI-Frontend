@@ -32,5 +32,13 @@ circuit1.add_transmission_line("L4", "Bus4", "Bus6", "B1", "C1", "G1", 20)
 circuit1.add_transmission_line("L5", "Bus5", "Bus6", "B1", "C1", "G1", 10)
 circuit1.add_transmission_line("L6", "Bus4", "Bus5", "B1", "C1", "G1", 35)
 
+#adding the loads
+circuit1.add_load("load2", "Bus2", 0, 0)
+circuit1.add_load("Load3","Bus3", 110, 50 )
+circuit1.add_load("Load4", "Bus4", 100, 70)
+circuit1.add_load("Load5", "Bus5", 100, 65)
+circuit1.add_load("Load6", "Bus6", 0, 0)
+circuit1.add_load("Load7", "Bus7", 0, 0)
+
 circuit1.calc_ybus()
 circuit1.print_ybus()

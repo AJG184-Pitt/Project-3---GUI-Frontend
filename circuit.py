@@ -47,95 +47,64 @@ class Circuit:
         load_obj = Load(name, self.bus[bus], real_power, reactive_power)
         self.load[name] = load_obj
 
-    # def calc_ybus(self):
-    #     N = len(self.buses)
-    #
-    #     # Initialize ybus matrix
-    #     Ybus = pd.DataFrame(index=range(N), columns=range(N)).fillna(0 + 0j).infer_objects(copy=False)
-    #
-    #     # Iterate through components
-    #     for component in list(self.transformers.values()) + list(self.transmission_lines.values()):
-    #         Yprim = component.yprim
-    #         # bus1_index = self.buses[component.bus1]
-    #         bus1_name = component.bus1.name
-    #         # bus2_index = self.buses[component.bus2]
-    #         bus2_name = component.bus2.name
-    #
-    #         if bus1_name in self.buses and bus2_name in self.buses:
-    #             # Get indices for buses in Ybus DataFrame
-    #             bus1_index = list(self.buses.keys()).index(bus1_name)
-    #             bus2_index = list(self.buses.keys()).index(bus2_name)
-    #
-    #             # Add self-admittances
-    #             Ybus.iloc[bus1_index, bus1_index] += Yprim[0, 0]
-    #             Ybus.iloc[bus2_index, bus2_index] += Yprim[1, 1]
-    #
-    #             # Add mutual admittances
-    #             Ybus.iloc[bus1_index, bus2_index] += Yprim[0, 1]
-    #             Ybus.iloc[bus2_index, bus1_index] += Yprim[1, 0]
-    #         else:
-    #             raise KeyError(f"Buses {bus1_name} or {bus2_name} not found in self.buses.")
-    #
-    #     for i in range(N):
-    #         if Ybus.iloc[i, i] == 0:
-    #             raise ValueError(f"Bus {list(self.buses.keys())[i]} has no self-admittance")
-    #
-    #     self.ybus = Ybus
+        def calc_ybus(self):
+            N = len(self.buses)
 
-    def calc_ybus(self):
-        bus_names = list(self.buses.keys())  # Get bus names
-        N = len(bus_names)
+            # Initialize ybus matrix
+            Ybus = pd.DataFrame(index=range(N), columns=range(N)).fillna(0 + 0j).infer_objects(copy=False)
 
-        # Initialize Ybus matrix with bus names
-        Ybus = pd.DataFrame(index=bus_names, columns=bus_names).fillna(0 + 0j).infer_objects(copy=False)
+            # Iterate through components
+            for component in list(self.transformers.values()) + list(self.transmission_lines.values()):
+                Yprim = component.yprim
+                bus1_name = component.bus1.name
+                bus2_name = component.bus2.name
 
-        for component in list(self.transformers.values()) + list(self.transmission_lines.values()):
-            Yprim = component.yprim
-            bus1_name = component.bus1.name
-            bus2_name = component.bus2.name
+                if bus1_name in self.buses and bus2_name in self.buses:
+                    # Get indices for buses in Ybus DataFrame
+                    bus1_index = list(self.buses.keys()).index(bus1_name)
+                    bus2_index = list(self.buses.keys()).index(bus2_name)
 
-            if bus1_name in bus_names and bus2_name in bus_names:
-                # Use bus names directly
-                Ybus.loc[bus1_name, bus1_name] += Yprim[0, 0]
-                Ybus.loc[bus2_name, bus2_name] += Yprim[1, 1]
-                Ybus.loc[bus1_name, bus2_name] += Yprim[0, 1]
-                Ybus.loc[bus2_name, bus1_name] += Yprim[1, 0]
+                    # Add self-admittances
+                    Ybus.iloc[bus1_index, bus1_index] += Yprim[0, 0]
+                    Ybus.iloc[bus2_index, bus2_index] += Yprim[1, 1]
+
+                    # Add mutual admittances
+                    Ybus.iloc[bus1_index, bus2_index] += Yprim[0, 1]
+                    Ybus.iloc[bus2_index, bus1_index] += Yprim[1, 0]
+                else:
+                    raise KeyError(f"Buses {bus1_name} or {bus2_name} not found in self.buses.")
+
+            for i in range(N):
+                if Ybus.iloc[i, i] == 0:
+                    raise ValueError(f"Bus {list(self.buses.keys())[i]} has no self-admittance")
+
+            self.ybus = Ybus
+
+        def print_ybus(self):
+            if self.ybus is not None:
+                with pd.option_context('display.max_rows', None, 'display.max_columns', None):
+                    print("Y-Bus Matrix")
+                    print(self.ybus)
             else:
-                raise KeyError(f"Buses {bus1_name} or {bus2_name} not found in self.buses.")
+                print("Y-Bus not calculated")
 
-        # Check for isolated buses
-        for bus in bus_names:
-            if Ybus.loc[bus, bus] == 0:
-                raise ValueError(f"Bus {bus} has no self-admittance")
+    if __name__ == '__main__':
+        circuit = Circuit("Test Circuit")
 
-        self.ybus = Ybus
+        circuit.add_bus("Bus1", 132)
+        circuit.add_bus("Bus2", 33)
 
-    def print_ybus(self):
-        if self.ybus is not None:
-            with pd.option_context('display.max_rows', None, 'display.max_columns', None):
-                print("Y-Bus Matrix")
-                print(self.ybus)
-        else:
-            print("Y-Bus not calculated")
+        circuit.add_conductor("ACSR", 25.76, 0.0111, 0.0891, 780)
 
+        circuit.add_bundle("Bundle1", 2, 0.3, "ACSR")
 
-if __name__ == '__main__':
-    circuit = Circuit("Test Circuit")
+        circuit.add_geometry("Triangle", 0, 15, -5, 15, 5, 15)
 
-    circuit.add_bus("Bus1", 132)
-    circuit.add_bus("Bus2", 33)
+        circuit.add_transformer("T1", "Bus1", "Bus2", 100, 10, 10)
 
-    circuit.add_conductor("ACSR", 25.76, 0.0111, 0.0891, 780)
+        circuit.add_transmission_line("L1", "Bus1", "Bus2", "Bundle1", "ACSR", "Triangle", 10)
 
-    circuit.add_bundle("Bundle1", 2, 0.3, "ACSR")
+        circuit.calc_ybus()
 
-    circuit.add_geometry("Triangle", 0, 15, -5, 15, 5, 15)
-
-    circuit.add_transformer("T1", "Bus1", "Bus2", 100, 10, 10)
-
-    circuit.add_transmission_line("L1", "Bus1", "Bus2", "Bundle1", "ACSR", "Triangle", 10)
-
-    circuit.calc_ybus()
-
-    circuit.calc_ybus()
-    circuit.print_ybus()
+        circuit.calc_ybus()
+        circuit.print_ybus()

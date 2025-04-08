@@ -78,7 +78,7 @@ class Solution:
 
         for bus in self.Bus.bus_count:
             if self.Bus.bus_type[bus] not in ['slack', 'PV']:
-                reactive_power_vector.append(real_power_vector[self.Bus.bus_count(bus)])
+                reactive_power_vector.append(reactive_power_vector[self.Bus.bus_count(bus)])
 
         y = np.concatenate(real_power_vector, reactive_power_vector)
         return y

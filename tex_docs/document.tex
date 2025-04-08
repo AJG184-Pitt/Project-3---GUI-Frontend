@@ -1,5 +1,5 @@
 \documentclass{article}
-\author{Aidan Gresko, Jake \dots}
+\author{Jake Kolevas, Aidan Gresko}
 \title{Main Simulator}
 \date{\today}
 
@@ -9,5 +9,49 @@
 	\maketitle
 	
 	\section{Overview}
-	This project aims to \dots
+	This project aims to simulate an advanced power system that involves transmission lines, transformers, buses, and other components of a power grid system.
+	
+	\section{Class Diagram}
+	
+	\textit{insert class diagram}
+	
+	\section{Classes}
+	
+	\subsection{Bus}
+	This class inserts the busses needed to build circuit. The class is designed such that any amount of busses can be added to the circuit and will be properly classified into PV, PQ, or slack busses
+	
+	\subsection{Transformer}
+	If two busses are set to differing voltage values this class inserts and calculates the necessary transformer equations to change the voltage of the system from bus A to the designated voltage level of bus B
+	
+	\subsection{Transmission Line}
+	When two busses of the same value need to be connected this class calculates the necessary electrical properties to insert a transmission line between the two busses.
+	
+	\subsection{Conductor}
+	Since the ACSR conductor type is used this class collects all the parameters about the conductors.
+	
+	\subsection{Bundle}
+	Since this circuit will use multiple conductors per phase in the transmission line this class is needed to calculate the parameters per phase
+	
+	\subsection{Geometry}
+	This class calculates how the location of the transmission lines affect certain parameters.
+	
+	\subsection{Circuit}
+	This class acts as the main source of controlling the flow of power throughout the system. It calls other methods and utilizes them to create objects and insert values for power flow analysis.
+	
+	\subsection{Seven Bus Power System}
+	This class has all the input data about the circuit that is built and analyzed.
+	
+	\section{Equations Used for Power Calculations}
+	
+	\section{Example Problem with Solution}
+	\noindent
+	Transformer Impedance: $Z_{pu} = Z_\% / 100 * S_{base} / S_{transformer} * \angle{\theta}$
+	
+	\noindent
+	Transformer Admittance: $Y_{pu} = 1 / Z_{pu}$
+	
+	\noindent
+	Transformer Y-Bus Matrix: [ $Y_{Bus}$ ] = [$Y_{11}$ $-Y_{12}$]
+
+	\hspace{141pt}[$-Y_{21}$ $Y_{22}$]	
 \end{document}

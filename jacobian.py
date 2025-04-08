@@ -269,9 +269,12 @@ if __name__ == '__main__':
     circuit = Circuit("Test Circuit")
     
     # Add buses with different types
-    bus1 = Bus("Bus1", 132, "Slack Bus")
-    bus2 = Bus("Bus2", 132, "PV Bus")
-    bus3 = Bus("Bus3", 33, "PQ Bus")
+    bus1 = Bus("Bus1", 132)
+    bus1.bus_type = 'Slack Bus'
+    bus2 = Bus("Bus2", 132)
+    bus2.bus_type = 'PV Bus'
+    bus3 = Bus("Bus3", 33)
+    bus3.bus_type = 'PQ Bus'
     
     circuit.buses = {"Bus1": bus1, "Bus2": bus2, "Bus3": bus3}
     

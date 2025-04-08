@@ -7,12 +7,11 @@ import pandas as pd
 
 class Solution:
 
-    def __init__(self, name: str, bus_k: Bus, bus_j: Bus, circuit: Circuit, load: Load):
+    def __init__(self, name: str, bus: Bus, circuit: Circuit, load: Load):
         self.name = name
-        self.bus1 = bus_k
-        self.bus2 = bus_j
-        self.circuit = Circuit
-        self.load= Load
+        self.bus = bus
+        self.circuit = circuit
+        self.load = load
         self.delta = dict()
         self.voltage = dict()
         self.P = self.calc_Px()
@@ -23,21 +22,21 @@ class Solution:
 
     #power injection
     def start(self):
-        self.delta = {bus: 0 for bus in self.Bus.bus_count}
-        self.voltages = {bus: 1 for bus in self.Bus.bus_count}
+        self.delta = {bus: 0 for bus in self.bus.index}
+        self.voltages = {bus: 1 for bus in self.bus.index}
 
 
     def calc_Px(self):
-        Px = {bus: 0 for bus in self.Bus.bus_count}
+        Px = {bus: 0 for bus in self.bus.index}
 
-        for k, bus_k in enumerate(self.Bus.bus_count):
+        for k, bus_k in enumerate(self.bus.index):
             V_k = self.voltage[bus_k]
             delta_k = self.delta[bus_k]
             P_k = 0
-            for j, bus_j in enumerate(self.Bus.bus_count):
+            for j, bus_j in enumerate(self.bus.index):
                 V_j = self.voltage[bus_j]
                 delta_j = self.delta[bus_j]
-                Y_kj = self.Circuit.ybus[k, j]
+                Y_kj = self.circuit.ybus[k, j]
                 P_k = V_k * V_j * abs(Y_kj) * np.cos(delta_k - delta_j - np.angle(Y_kj))
 
             Px[bus_k] = P_k
@@ -45,13 +44,13 @@ class Solution:
         return Px
 
     def calc_Qx(self):
-        Qx = {bus: 0 for bus in self.Bus.bus_count}
+        Qx = {bus: 0 for bus in self.bus.bus_count}
 
-        for k, bus_k in enumerate(self.Bus.bus_count):
+        for k, bus_k in enumerate(self.bus.bus_count):
             V_k = self.voltage[bus_k]
             delta_k = self.delta[bus_k]
             Q_k = 0
-            for j, bus_j in enumerate(self.Bus.bus_count):
+            for j, bus_j in enumerate(self.bus.bus_count):
                 V_j = self.voltage[bus_j]
                 delta_j = self.delta[bus_j]
                 Y_kj = self.circuit.ybus[k, j]
@@ -69,16 +68,18 @@ class Solution:
         return x
 
     def initialize_y(self):
-        real_power_vector = np.array(list(self.load.real_power))/s.base_power
-        reactive_power_vector = np.array(list(self.load.reactive_power)) / s.base_power
 
-        for bus in self.Bus.bus_count:
-            if self.Bus.bus_type[bus] != 'slack':
-                real_power_vector.append(real_power_vector[self.Bus.bus_count(bus)])
+        for load in enumerate(self.circuit.load.values()):
+            real_power_vector = np.array(list(load["real_power"]))/s.base_power
+            reactive_power_vector = np.array(list(load["reactive_power"]))/s.base_power
 
-        for bus in self.Bus.bus_count:
-            if self.Bus.bus_type[bus] not in ['slack', 'PV']:
-                reactive_power_vector.append(reactive_power_vector[self.Bus.bus_count(bus)])
+        for bus in self.bus.bus_count:
+            if self.bus.bus_type[bus] != 'slack':
+                real_power_vector.append(real_power_vector[self.bus.bus_count(bus)])
+
+        for bus in self.bus.bus_count:
+            if self.bus.bus_type[bus] not in ['slack', 'PV']:
+                reactive_power_vector.append(reactive_power_vector[self.bus.bus_count(bus)])
 
         y = np.concatenate(real_power_vector, reactive_power_vector)
         return y

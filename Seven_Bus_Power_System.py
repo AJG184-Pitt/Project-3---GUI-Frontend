@@ -13,6 +13,14 @@ circuit1.add_bus("Bus5", 230)
 circuit1.add_bus("Bus6", 230)
 circuit1.add_bus("Bus7", 18)
 
+circuit1.buses["Bus1"].bus_type = 'PV Bus'
+circuit1.buses["Bus2"].bus_type = 'PV Bus'
+circuit1.buses["Bus3"].bus_type = 'PV Bus'
+circuit1.buses["Bus4"].bus_type = 'PV Bus'
+circuit1.buses["Bus5"].bus_type = 'PV Bus'
+circuit1.buses["Bus6"].bus_type = 'PV Bus'
+circuit1.buses["Bus7"].bus_type = 'PV Bus'
+
 #adding the 2 transformers
 circuit1.add_transformer("T1", "Bus1", "Bus2", 125, 8.5, 10 )
 circuit1.add_transformer("T2", "Bus6", "Bus7", 200, 10.5, 12 )

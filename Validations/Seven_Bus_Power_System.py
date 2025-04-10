@@ -1,4 +1,6 @@
 from circuit import Circuit
+from jacobian import Jacobian
+import numpy as np
 
 circuit1 = Circuit("Test Circuit")
 
@@ -42,3 +44,7 @@ circuit1.add_load("Load7", "Bus7", 0, 0)
 
 circuit1.calc_ybus()
 circuit1.print_ybus()
+
+angles = np.array([bus.delta for bus in circuit1.buses])
+voltages = np.array([bus.vpu for bus in circuit1.buses])
+J = Jacobian.calc_jacobian(list(circuit1.buses.values()), circuit1.ybus, angles, voltages)

@@ -5,6 +5,7 @@ from geometry import Geometry
 from transformer import Transformer
 from transmissionline import TransmissionLine
 from load import Load
+from generator import Generator
 import numpy as np
 import pandas as pd
 
@@ -18,6 +19,7 @@ class Circuit:
         self.transformers = dict()
         self.transmission_lines = dict()
         self.load = dict()
+        self.generator = dict()
         self.ybus = None
 
     def add_bundle(self, name, num_conductors, spacing, conductor):
@@ -47,6 +49,10 @@ class Circuit:
     def add_load(self, name, bus, real_power, reactive_power):
         load_obj = Load(name, bus[bus], real_power, reactive_power)
         self.load[name] = load_obj
+
+    def add_generator(self, name, bus, voltage_setpoint, mw_setpoint):
+        generator_obj = Generator(name, bus[bus], voltage_setpoint, mw_setpoint)
+        self.generator = generator_obj
 
     def calc_ybus(self):
         N = len(self.buses)

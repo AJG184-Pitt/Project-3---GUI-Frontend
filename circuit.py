@@ -75,6 +75,7 @@ class Circuit:
                 Ybus.iloc[bus1_index, bus1_index] += Yprim[0, 0]
                 Ybus.iloc[bus2_index, bus2_index] += Yprim[1, 1]
 
+
                 # Add mutual admittances
                 Ybus.iloc[bus1_index, bus2_index] += Yprim[0, 1]
                 Ybus.iloc[bus2_index, bus1_index] += Yprim[1, 0]

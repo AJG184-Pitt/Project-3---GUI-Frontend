@@ -45,6 +45,11 @@ circuit1.add_load("Load7", "Bus7", 0, 0)
 circuit1.calc_ybus()
 circuit1.print_ybus()
 
-angles = np.array([bus.delta for bus in circuit1.buses])
-voltages = np.array([bus.vpu for bus in circuit1.buses])
-J = Jacobian.calc_jacobian(list(circuit1.buses.values()), circuit1.ybus, angles, voltages)
+angles = np.array([bus.delta for bus in circuit1.buses.values()])
+voltages = np.array([bus.vpu for bus in circuit1.buses.values()])
+jacobian = Jacobian()
+
+J = jacobian.calc_jacobian(list(circuit1.buses.values()), circuit1.ybus, angles, voltages)
+
+print("Jacobian Matrix:")
+print(J)

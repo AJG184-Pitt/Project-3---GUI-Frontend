@@ -17,6 +17,7 @@ class Circuit:
         self.geometries = dict()
         self.transformers = dict()
         self.transmission_lines = dict()
+        self.loads = dict()
         self.ybus = None
 
     def add_bundle(self, name, num_conductors, spacing, conductor):
@@ -44,8 +45,8 @@ class Circuit:
         self.transmission_lines[name] = transmission_line_obj
 
     def add_load(self, name, bus, real_power, reactive_power):
-        load_obj = Load(name, self.bus[bus], real_power, reactive_power)
-        self.load[name] = load_obj
+        load_obj = Load(name, self.buses[bus], real_power, reactive_power)
+        self.loads[name] = load_obj
 
     def calc_ybus(self):
         N = len(self.buses)

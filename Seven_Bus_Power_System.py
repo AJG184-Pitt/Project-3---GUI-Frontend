@@ -1,4 +1,6 @@
 from circuit import Circuit
+from jacobian import Jacobian
+import numpy as np
 
 circuit1 = Circuit("Test Circuit")
 
@@ -10,6 +12,14 @@ circuit1.add_bus("Bus4", 230)
 circuit1.add_bus("Bus5", 230)
 circuit1.add_bus("Bus6", 230)
 circuit1.add_bus("Bus7", 18)
+
+circuit1.buses["Bus1"].bus_type = 'PV Bus'
+circuit1.buses["Bus2"].bus_type = 'PV Bus'
+circuit1.buses["Bus3"].bus_type = 'PV Bus'
+circuit1.buses["Bus4"].bus_type = 'PV Bus'
+circuit1.buses["Bus5"].bus_type = 'PV Bus'
+circuit1.buses["Bus6"].bus_type = 'PV Bus'
+circuit1.buses["Bus7"].bus_type = 'PV Bus'
 
 #adding the 2 transformers
 circuit1.add_transformer("T1", "Bus1", "Bus2", 125, 8.5, 10 )
@@ -43,3 +53,11 @@ circuit1.add_load("Load7", "Bus7", 0, 0)
 circuit1.calc_ybus()
 circuit1.print_ybus()
 
+angles = np.array([bus.delta for bus in circuit1.buses.values()])
+voltages = np.array([bus.vpu for bus in circuit1.buses.values()])
+jacobian = Jacobian()
+
+J = jacobian.calc_jacobian(list(circuit1.buses.values()), circuit1.ybus, angles, voltages)
+
+print("Jacobian Matrix:")
+print(J)

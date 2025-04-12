@@ -1,6 +1,10 @@
 import numpy as np
 from numpy.linalg import solve
 from enum import Enum
+import pandas as pd
+from circuit import Circuit
+from bus import Bus
+import numpy as np
 
 # Import the Jacobian class from milestone 7
 from jacobian import Jacobian, BusType
@@ -283,11 +287,6 @@ class PowerFlow:
         return J
 
 if __name__ == "__main__":
-    # Example usage with Circuit class:
-    from circuit import Circuit
-    from bus import Bus
-    import numpy as np
-    
     # Create a test circuit
     circuit = Circuit("Test Power Flow")
     
@@ -313,7 +312,7 @@ if __name__ == "__main__":
         [complex(-5, 15), complex(10, -30), complex(-5, 15)],
         [complex(-5, 15), complex(-5, 15), complex(10, -30)]
     ]
-    import pandas as pd
+    
     circuit.ybus = pd.DataFrame(ybus_data)
     
     # Create and run the solver

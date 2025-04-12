@@ -1,4 +1,7 @@
 import numpy as np
+import pandas as pd
+from circuit import Circuit
+from bus import Bus
 
 class BusType:
     SLACK = 1
@@ -234,57 +237,39 @@ class Jacobian:
         
         return j4
 
-# Extension method for the Circuit class to calculate Jacobian
-def calc_jacobian_for_circuit(circuit):
-    """
-    Calculate the Jacobian matrix for a Circuit object
-    
-    Parameters:
-        circuit: Circuit object with buses and Ybus
-    
-    Returns:
-        J: The Jacobian matrix
-    """
-    # Make sure ybus has been calculated first
-    if circuit.ybus is None:
-        circuit.calc_ybus()
-    
-    # Extract bus data
-    buses = list(circuit.buses.values())
-    angles = np.array([bus.delta for bus in buses])
-    voltages = np.array([bus.vpu for bus in buses])
-    
-    # Create Jacobian instance and calculate
-    jacobian = Jacobian()
-    J = jacobian.calc_jacobian(buses, circuit.ybus, angles, voltages)
-    return J
-
-
 # Example usage with your Circuit class:
 if __name__ == '__main__':
-    from circuit import Circuit
-    from bus import Bus
-    
     # Create a test circuit
     circuit = Circuit("Test Circuit")
-    
+        
     # Add buses with different types
-    bus1 = Bus("Bus1", 132, "Slack Bus")
-    bus2 = Bus("Bus2", 132, "PV Bus")
-    bus3 = Bus("Bus3", 33, "PQ Bus")
+    bus1 = Bus("Bus1", 132)
+    bus1.bus_type = 'Slack Bus'
+    bus2 = Bus("Bus2", 132)
+    bus2.bus_type = 'PV Bus'
+    bus3 = Bus("Bus3", 33)
+    bus3.bus_type = 'PQ Bus'
     
     circuit.buses = {"Bus1": bus1, "Bus2": bus2, "Bus3": bus3}
     
     # Create a sample Ybus matrix
-    import pandas as pd
     circuit.ybus = pd.DataFrame([
         [complex(1.5, -4.0), complex(-0.5, 1.0), complex(-1.0, 3.0)],
         [complex(-0.5, 1.0), complex(1.0, -3.0), complex(-0.5, 2.0)],
         [complex(-1.0, 3.0), complex(-0.5, 2.0), complex(1.5, -5.0)]
     ])
     
+    # Extract bus data
+    angles = np.array([bus.delta for bus in circuit.buses.values()])
+    voltages = np.array([bus.vpu for bus in circuit.buses.values()])
+
+    # Create Jacobian instance
+    jacobian = Jacobian()
+    
     # Calculate the Jacobian
-    J = calc_jacobian_for_circuit(circuit)
+    J = jacobian.calc_jacobian(list(circuit.buses.values()), circuit.ybus, angles, voltages)
+    # Alternatively, you could use the extension method:
+    # J = calc_jacobian_for_circuit(circuit)
     
     print("Jacobian Matrix:")
     print(np.round(J, 4))

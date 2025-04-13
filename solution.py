@@ -9,7 +9,7 @@ class Solution:
 
     def __init__(self, name: str, bus: Bus, circuit: Circuit, load: Load):
         self.name = name
-        self.bus = bus
+        self.bus = bus  # This is a single bus object
         self.circuit = circuit
         self.load = load
         self.delta = dict()  # Will be populated with {bus_name: angle_value}
@@ -24,8 +24,10 @@ class Solution:
 
     # Initialize with flat start
     def start(self):
-        self.delta = {bus: 0 for bus in self.bus.index}
-        self.voltage = {bus: 1 for bus in self.bus.index}  # Fixed from self.voltages to self.voltage
+        # Use circuit.buses.keys() instead of self.bus.index
+        self.delta = {bus_name: 0 for bus_name in self.circuit.buses.keys()}
+        self.voltage = {bus_name: 1 for bus_name in self.circuit.buses.keys()}
+        
         # Now calculate the power values
         self.P = self.calc_Px()
         self.Q = self.calc_Qx()
@@ -35,14 +37,15 @@ class Solution:
 
     def calc_Px(self):
         # Active power calculation
-        Px = {bus: 0 for bus in self.bus.index}
+        # Use circuit.buses.keys() instead of self.bus.index
+        Px = {bus_name: 0 for bus_name in self.circuit.buses.keys()}
 
-        for k, bus_k in enumerate(self.bus.index):
+        for k, bus_k in enumerate(self.circuit.buses.keys()):
             V_k = self.voltage[bus_k]
             delta_k = self.delta[bus_k]
             P_k = 0  # Initialize power for this bus
             
-            for j, bus_j in enumerate(self.bus.index):
+            for j, bus_j in enumerate(self.circuit.buses.keys()):
                 V_j = self.voltage[bus_j]
                 delta_j = self.delta[bus_j]
                 Y_kj = self.circuit.ybus.iloc[k, j] if isinstance(self.circuit.ybus, pd.DataFrame) else self.circuit.ybus[k, j]
@@ -56,14 +59,15 @@ class Solution:
 
     def calc_Qx(self):
         # Reactive power calculation
-        Qx = {bus: 0 for bus in self.bus.index}  # Use self.bus.index for consistency
+        # Use circuit.buses.keys() instead of self.bus.index
+        Qx = {bus_name: 0 for bus_name in self.circuit.buses.keys()}
 
-        for k, bus_k in enumerate(self.bus.index):
+        for k, bus_k in enumerate(self.circuit.buses.keys()):
             V_k = self.voltage[bus_k]
             delta_k = self.delta[bus_k]
             Q_k = 0  # Initialize reactive power for this bus
             
-            for j, bus_j in enumerate(self.bus.index):
+            for j, bus_j in enumerate(self.circuit.buses.keys()):
                 V_j = self.voltage[bus_j]
                 delta_j = self.delta[bus_j]
                 Y_kj = self.circuit.ybus.iloc[k, j] if isinstance(self.circuit.ybus, pd.DataFrame) else self.circuit.ybus[k, j]
@@ -84,42 +88,118 @@ class Solution:
 
     def initialize_y(self):
         # This method needs significant revision
-        # Start with empty arrays
-        real_power_vector = []
-        reactive_power_vector = []
+        # In the power flow analysis context, we need to create specified power vectors
+        # respecting the order and structure needed for the Jacobian matrix
         
-        # Assuming self.circuit.load is a dictionary of load objects
+        # Get bus type information for determining which values go where
+        bus_type_map = {
+            "Slack Bus": 1,  # BusType.SLACK
+            "PV Bus": 2,     # BusType.PV
+            "PQ Bus": 3      # BusType.PQ
+        }
+        
+        # Create mappings for buses with P and Q mismatches
+        p_buses = []  # P mismatch buses (all except slack)
+        q_buses = []  # Q mismatch buses (only PQ buses)
+        
+        # Identify which buses have P and Q mismatches
+        for bus_name, bus in self.circuit.buses.items():
+            bus_type = bus_type_map.get(bus.bus_type, bus.bus_type)
+            
+            if bus_type != 1:  # Not a slack bus
+                p_buses.append(bus_name)
+            if bus_type == 3:  # PQ bus
+                q_buses.append(bus_name)
+        
+        # Initialize specified power values with zeros
+        P_spec = {bus_name: 0 for bus_name in self.circuit.buses.keys()}
+        Q_spec = {bus_name: 0 for bus_name in self.circuit.buses.keys()}
+        
+        # Add load contributions
         if hasattr(self.circuit, 'load') and self.circuit.load:
-            # Process all loads
+            # Process all loads in the circuit
             for load_name, load in self.circuit.load.items():
-                # Add load values to vectors (adjusting by base power)
-                real_power = load.real_power / s.base_power
-                reactive_power = load.reactive_power / s.base_power
-                
-                # Store these for later use
-                load_bus = load.bus.name if hasattr(load.bus, 'name') else load.bus
-                real_power_vector.append(real_power)
-                reactive_power_vector.append(reactive_power)
-        else:
+                bus_name = load.bus.name if hasattr(load.bus, 'name') else load.bus
+                P_spec[bus_name] -= load.real_power / s.base_power  # Negative for loads
+                Q_spec[bus_name] -= load.reactive_power / s.base_power  # Negative for loads
+        elif self.load:
             # Use the single load passed to constructor
-            real_power = self.load.real_power / s.base_power
-            reactive_power = self.load.reactive_power / s.base_power
-            real_power_vector.append(real_power)
-            reactive_power_vector.append(reactive_power)
+            bus_name = self.load.bus.name if hasattr(self.load.bus, 'name') else self.load.bus
+            P_spec[bus_name] -= self.load.real_power / s.base_power  # Negative for loads
+            Q_spec[bus_name] -= self.load.reactive_power / s.base_power  # Negative for loads
         
-        # Convert to numpy arrays
-        real_power_array = np.array(real_power_vector)
-        reactive_power_array = np.array(reactive_power_vector)
+        # Add generator contributions if available
+        # This part depends on how generator data is stored in your model
+        # For now, we'll assume generators are attributes of buses
+        for bus_name, bus in self.circuit.buses.items():
+            if hasattr(bus, 'p_gen'):
+                P_spec[bus_name] += bus.p_gen / s.base_power
+            if hasattr(bus, 'q_gen'):
+                Q_spec[bus_name] += bus.q_gen / s.base_power
         
-        # Combine arrays
-        y = np.concatenate((real_power_array, reactive_power_array))
+        # Create the specified power vectors in the correct order
+        # These should match the order of equations in the Jacobian matrix
+        p_vector = [P_spec[bus] for bus in p_buses]
+        q_vector = [Q_spec[bus] for bus in q_buses]
+        
+        # Combine into a single vector
+        y = np.concatenate((np.array(p_vector), np.array(q_vector)))
+        
         return y
 
     def calc_mismatch(self):
         # Calculate mismatch between calculated and specified values
-        if self.x is None:
-            self.x = self.initialize_x()
-        if self.y is None:
-            self.y = self.initialize_y()
+        # We'll use a more direct approach that handles the Jacobian structure correctly
+        
+        # Get bus type information
+        bus_type_map = {
+            "Slack Bus": 1,  # BusType.SLACK
+            "PV Bus": 2,     # BusType.PV
+            "PQ Bus": 3      # BusType.PQ
+        }
+        
+        # Create mappings for buses with P and Q equations
+        p_buses = []  # P mismatch buses (all except slack)
+        q_buses = []  # Q mismatch buses (only PQ buses)
+        
+        # Identify which buses have P and Q mismatches
+        for bus_name, bus in self.circuit.buses.items():
+            bus_type = bus_type_map.get(bus.bus_type, bus.bus_type)
             
-        return self.y - self.x
+            if bus_type != 1:  # Not a slack bus
+                p_buses.append(bus_name)
+            if bus_type == 3:  # PQ bus
+                q_buses.append(bus_name)
+        
+        # Initialize specified power values with zeros
+        P_spec = {bus_name: 0 for bus_name in self.circuit.buses.keys()}
+        Q_spec = {bus_name: 0 for bus_name in self.circuit.buses.keys()}
+        
+        # Add load contributions
+        if hasattr(self.circuit, 'load') and self.circuit.load:
+            # Process all loads in the circuit
+            for load_name, load in self.circuit.load.items():
+                bus_name = load.bus.name if hasattr(load.bus, 'name') else load.bus
+                P_spec[bus_name] -= load.real_power / s.base_power  # Negative for loads
+                Q_spec[bus_name] -= load.reactive_power / s.base_power  # Negative for loads
+        elif self.load:
+            # Use the single load passed to constructor
+            bus_name = self.load.bus.name if hasattr(self.load.bus, 'name') else self.load.bus
+            P_spec[bus_name] -= self.load.real_power / s.base_power  # Negative for loads
+            Q_spec[bus_name] -= self.load.reactive_power / s.base_power  # Negative for loads
+        
+        # Add generator contributions if available
+        for bus_name, bus in self.circuit.buses.items():
+            if hasattr(bus, 'p_gen'):
+                P_spec[bus_name] += bus.p_gen / s.base_power
+            if hasattr(bus, 'q_gen'):
+                Q_spec[bus_name] += bus.q_gen / s.base_power
+        
+        # Calculate power mismatches
+        p_mismatch = [P_spec[bus] - self.P[bus] for bus in p_buses]
+        q_mismatch = [Q_spec[bus] - self.Q[bus] for bus in q_buses]
+        
+        # Combine into a single mismatch vector
+        mismatch = np.concatenate((np.array(p_mismatch), np.array(q_mismatch)))
+        
+        return mismatch

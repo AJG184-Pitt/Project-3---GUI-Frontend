@@ -1,6 +1,7 @@
 from circuit import Circuit
 from jacobian import Jacobian
 import numpy as np
+from powerflow import PowerFlow
 
 circuit1 = Circuit("Test Circuit")
 
@@ -13,13 +14,18 @@ circuit1.add_bus("Bus5", 230)
 circuit1.add_bus("Bus6", 230)
 circuit1.add_bus("Bus7", 18)
 
-circuit1.buses["Bus1"].bus_type = 'PV Bus'
+circuit1.buses["Bus1"].bus_type = 'Slack Bus'
 circuit1.buses["Bus2"].bus_type = 'PV Bus'
-circuit1.buses["Bus3"].bus_type = 'PV Bus'
-circuit1.buses["Bus4"].bus_type = 'PV Bus'
-circuit1.buses["Bus5"].bus_type = 'PV Bus'
-circuit1.buses["Bus6"].bus_type = 'PV Bus'
+circuit1.buses["Bus3"].bus_type = 'PQ Bus'
+circuit1.buses["Bus4"].bus_type = 'PQ Bus'
+circuit1.buses["Bus5"].bus_type = 'PQ Bus'
+circuit1.buses["Bus6"].bus_type = 'PQ Bus'
 circuit1.buses["Bus7"].bus_type = 'PV Bus'
+
+circuit1.buses["Bus1"].vpu = 1.0  # Slack bus voltage
+circuit1.buses["Bus2"].vpu = 1.0  # PV bus voltage (if it's a PV bus)
+circuit1.buses["Bus7"].vpu = 1.0  # PV bus voltage
+circuit1.buses["Bus7"].real_power = -200
 
 #adding the 2 transformers
 circuit1.add_transformer("T1", "Bus1", "Bus2", 125, 8.5, 10 )
@@ -59,5 +65,27 @@ jacobian = Jacobian()
 
 J = jacobian.calc_jacobian(list(circuit1.buses.values()), circuit1.ybus, angles, voltages)
 
-print("Jacobian Matrix:")
+print("\nJacobian Matrix:")
 print(J)
+
+powerflow = PowerFlow()
+results = powerflow.solve_circuit(circuit1)
+
+# Print results
+print("\nPower Flow Solution:")
+print("--------------------")
+print(f"Converged: {results['converged']}")
+print(f"Iterations: {results['iterations']}")
+
+print("\nBus Voltages:")
+for i, bus_name in enumerate(circuit1.buses.keys()):
+    v_mag = results['v_mag'][i]
+    v_ang_deg = np.degrees(results['v_ang'][i])
+    print(f"{bus_name}: {v_mag:.4f} ∠{v_ang_deg:.2f}°")
+
+if 'p_calc' in results and 'q_calc' in results:
+    print("\nPower Injections:")
+    for i, bus_name in enumerate(circuit1.buses.keys()):
+        p = results['p_calc'][i]
+        q = results['q_calc'][i]
+        print(f"{bus_name}: P = {p:.4f} p.u., Q = {q:.4f} p.u.")

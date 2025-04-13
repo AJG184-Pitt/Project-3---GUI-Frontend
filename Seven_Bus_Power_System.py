@@ -2,6 +2,7 @@ from circuit import Circuit
 from jacobian import Jacobian
 import numpy as np
 from powerflow import PowerFlow
+from solution import Solution
 
 circuit1 = Circuit("Test Circuit")
 
@@ -91,3 +92,9 @@ if 'p_calc' in results and 'q_calc' in results:
         p = results['p_calc'][i]
         q = results['q_calc'][i]
         print(f"{bus_name}: P = {p:.4f} p.u., Q = {q:.4f} p.u.")
+
+solution = Solution("Solution 1", circuit1.buses.values(), circuit1, circuit1.loads)
+solution.start()
+
+print("\nSolution Power Mismatch")
+print(solution.calc_mismatch())

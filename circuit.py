@@ -90,7 +90,7 @@ class Circuit:
 
     def print_ybus(self):
         if self.ybus is not None:
-            with pd.option_context('display.max_rows', None, 'display.max_columns', None):
+            with pd.option_context('display.max_rows', 50, 'display.max_columns', 50):
                 print("Y-Bus Matrix")
                 print(self.ybus)
         else:

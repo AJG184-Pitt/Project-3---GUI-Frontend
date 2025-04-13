@@ -2,6 +2,7 @@ from circuit import Circuit
 from jacobian import Jacobian
 import numpy as np
 from powerflow import PowerFlow
+from solution import Solution
 
 circuit1 = Circuit("Test Circuit")
 
@@ -56,6 +57,8 @@ circuit1.add_load("Load5", "Bus5", 100, 65)
 circuit1.add_load("Load6", "Bus6", 0, 0)
 circuit1.add_load("Load7", "Bus7", 0, 0)
 
+np.set_printoptions(threshold=np.inf, linewidth=np.inf)
+
 circuit1.calc_ybus()
 circuit1.print_ybus()
 
@@ -64,8 +67,8 @@ voltages = np.array([bus.vpu for bus in circuit1.buses.values()])
 jacobian = Jacobian()
 
 J = jacobian.calc_jacobian(list(circuit1.buses.values()), circuit1.ybus, angles, voltages)
-
 print("\nJacobian Matrix:")
+
 print(J)
 
 powerflow = PowerFlow()
@@ -89,3 +92,9 @@ if 'p_calc' in results and 'q_calc' in results:
         p = results['p_calc'][i]
         q = results['q_calc'][i]
         print(f"{bus_name}: P = {p:.4f} p.u., Q = {q:.4f} p.u.")
+
+solution = Solution("Solution 1", circuit1.buses.values(), circuit1, circuit1.loads)
+solution.start()
+
+print("\nSolution Power Mismatch")
+print(solution.calc_mismatch())

@@ -56,6 +56,8 @@ circuit1.add_load("Load5", "Bus5", 100, 65)
 circuit1.add_load("Load6", "Bus6", 0, 0)
 circuit1.add_load("Load7", "Bus7", 0, 0)
 
+np.set_printoptions(threshold=np.inf, linewidth=np.inf)
+
 circuit1.calc_ybus()
 circuit1.print_ybus()
 
@@ -64,8 +66,8 @@ voltages = np.array([bus.vpu for bus in circuit1.buses.values()])
 jacobian = Jacobian()
 
 J = jacobian.calc_jacobian(list(circuit1.buses.values()), circuit1.ybus, angles, voltages)
-
 print("\nJacobian Matrix:")
+
 print(J)
 
 powerflow = PowerFlow()

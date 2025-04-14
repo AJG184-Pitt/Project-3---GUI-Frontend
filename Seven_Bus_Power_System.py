@@ -67,9 +67,8 @@ angles = np.array([bus.delta for bus in circuit1.buses.values()])
 voltages = np.array([bus.vpu for bus in circuit1.buses.values()])
 jacobian = Jacobian()
 
-J = jacobian.calc_jacobian(list(circuit1.buses.values()), circuit1.ybus, angles, voltages)
+J = jacobian.calc_jacobian(circuit1.buses.values(), circuit1.ybus, angles, voltages)
 print("\nJacobian Matrix:")
-
 print(J)
 
 powerflow = PowerFlow()
@@ -99,3 +98,6 @@ solution.start()
 
 print("\nSolution Power Mismatch")
 print(solution.calc_mismatch())
+print("\nPower Injections")
+print(solution.calc_Px())
+print(solution.calc_Qx())

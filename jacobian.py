@@ -314,11 +314,11 @@ class Jacobian:
                 if i == j:
                     # Diagonal elements (n = k case)
                     sum_term = 0
-                    for n in range(len(voltages)):
+                    for n in range(len(buses)):
                         if n != i:  # n ≠ k
-                            y_in = ybus[i, n]
-                            y_in_abs = abs(y_in)
-                            theta_in = np.angle(y_in)
+                            # y_in = ybus[i, n]
+                            y_in_abs = abs(ybus[i, n])
+                            theta_in = np.angle(ybus[i, n])
                             sum_term += y_in_abs * voltages[n] * np.sin(angles[i] - angles[n] - theta_in)
                     
                     j1[i_idx, j_idx] = -voltages[i] * sum_term
@@ -354,7 +354,7 @@ class Jacobian:
                     theta_ii = np.angle(y_ii)
                     first_term = voltages[i] * y_ii_abs * np.cos(theta_ii)
 
-                    for n in range(len(voltages)):
+                    for n in range(len(buses)):
                         if n != i:  # n ≠ k
                             y_in = ybus[i, n]
                             y_in_abs = abs(y_in)
@@ -389,7 +389,7 @@ class Jacobian:
                     # Diagonal elements (n = k case)
                     sum_term = 0
 
-                    for n in range(len(voltages)):
+                    for n in range(len(buses)):
                         if n != i:  # n ≠ k
                             y_in = ybus[i, n]
                             y_in_abs = abs(y_in)
@@ -429,7 +429,7 @@ class Jacobian:
                     theta_ii = np.angle(y_ii)
                     first_term = -voltages[i] * y_ii_abs * np.sin(theta_ii)
 
-                    for n in range(len(voltages)):
+                    for n in range(len(buses)):
                         if n != i:  # n ≠ k
                             y_in = ybus[i, n]
                             y_in_abs = abs(y_in)
@@ -486,27 +486,4 @@ if __name__ == '__main__':
     # Create Jacobian instance
     jacobian = Jacobian()
 
-    # Perform Newton-Raphson iterations
-    print("Starting Newton-Raphson iterations...")
-    solution, iterations, converged = jacobian.newton_raphson_iteration(solution)
-
-    if converged:
-        print(f"Converged in {iterations} iterations")
-    else:
-        print(f"Did not converge after {iterations} iterations")
-
-    print("\nFinal State:")
-    print("Bus\t\tVoltage (pu)\tAngle (rad)")
-    for bus_name, voltage in solution.voltage.items():
-        print(f"{bus_name}\t\t{voltage:.4f}\t\t{solution.delta[bus_name]:.4f}")
-
-    print("\nPower Injections:")
-    print("Bus\t\tP (pu)\t\tQ (pu)")
-    for bus_name, p in solution.P.items():
-        q = solution.Q.get(bus_name, "N/A")
-        print(f"{bus_name}\t\t{p:.4f}\t\t{q if q == 'N/A' else f'{q:.4f}'}")
-
-    # Calculate final mismatch to verify solution quality
-    final_mismatch = jacobian.calc_mismatch(solution)
-    print("\nFinal Mismatch (should be close to zero):")
-    print(final_mismatch)
+    print(jacobian.calc_jacobian())

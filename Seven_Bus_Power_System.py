@@ -16,7 +16,7 @@ circuit1.add_bus("Bus6", 230)
 circuit1.add_bus("Bus7", 18)
 
 circuit1.buses["Bus1"].bus_type = 'Slack Bus'
-circuit1.buses["Bus2"].bus_type = 'PV Bus'
+circuit1.buses["Bus2"].bus_type = 'PQ Bus'
 circuit1.buses["Bus3"].bus_type = 'PQ Bus'
 circuit1.buses["Bus4"].bus_type = 'PQ Bus'
 circuit1.buses["Bus5"].bus_type = 'PQ Bus'
@@ -24,7 +24,8 @@ circuit1.buses["Bus6"].bus_type = 'PQ Bus'
 circuit1.buses["Bus7"].bus_type = 'PV Bus'
 
 circuit1.buses["Bus1"].vpu = 1.0  # Slack bus voltage
-circuit1.buses["Bus2"].vpu = 1.0  # PV bus voltage (if it's a PV bus)
+circuit1.buses["Bus1"].delta = 0.0
+# circuit1.buses["Bus2"].vpu = 1.0  # PV bus voltage (if it's a PV bus)
 circuit1.buses["Bus7"].vpu = 1.0  # PV bus voltage
 circuit1.buses["Bus7"].real_power = -200
 
@@ -55,7 +56,7 @@ circuit1.add_load("Load3","Bus3", 110, 50 )
 circuit1.add_load("Load4", "Bus4", 100, 70)
 circuit1.add_load("Load5", "Bus5", 100, 65)
 circuit1.add_load("Load6", "Bus6", 0, 0)
-circuit1.add_load("Load7", "Bus7", 0, 0)
+# circuit1.add_load("Load7", "Bus7", 0, 0)
 
 np.set_printoptions(threshold=np.inf, linewidth=np.inf)
 

@@ -11,6 +11,10 @@ class Bus:
         self.bus_type = 'Slack Bus'
         self.vpu = 1.0
         self.delta = 0.0
+        #need a way to store real and reactive power
+        self.real_power = float
+        self.reactive_power = float
+
 
 if __name__ == '__main__':
     bus1 = Bus("Bus 1", 20, "PV Bus")

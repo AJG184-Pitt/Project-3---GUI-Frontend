@@ -138,7 +138,6 @@ class Solution:
                 Q_spec[bus_name] += bus.q_gen / s.base_power
         
         # Create the specified power vectors in the correct order
-        # These should match the order of equations in the Jacobian matrix
         p_vector = [P_spec[bus] for bus in p_buses]
         q_vector = [Q_spec[bus] for bus in q_buses]
         

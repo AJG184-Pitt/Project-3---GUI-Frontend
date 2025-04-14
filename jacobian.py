@@ -100,204 +100,204 @@ class Jacobian:
         
         return J
     
-    def calc_jacobian_with_solution(self, solution):
-        """
-        Calculate the Jacobian matrix using the Solution object
+    # def calc_jacobian_with_solution(self, solution):
+    #     """
+    #     Calculate the Jacobian matrix using the Solution object
         
-        Parameters:
-            solution: Solution object with delta, voltage, and circuit information
+    #     Parameters:
+    #         solution: Solution object with delta, voltage, and circuit information
             
-        Returns:
-            J: The complete Jacobian matrix
-        """
-        # Extract data from solution
-        circuit = solution.circuit
-        buses = list(circuit.buses.values())
-        ybus = circuit.ybus
+    #     Returns:
+    #         J: The complete Jacobian matrix
+    #     """
+    #     # Extract data from solution
+    #     circuit = solution.circuit
+    #     buses = list(circuit.buses.values())
+    #     ybus = circuit.ybus
         
-        # Convert delta and voltage dictionaries to arrays in the correct order
-        angles = []
-        voltages = []
-        for bus_name in circuit.buses.keys():
-            angles.append(solution.delta[bus_name])
-            voltages.append(solution.voltage[bus_name])
+    #     # Convert delta and voltage dictionaries to arrays in the correct order
+    #     angles = []
+    #     voltages = []
+    #     for bus_name in circuit.buses.keys():
+    #         angles.append(solution.delta[bus_name])
+    #         voltages.append(solution.voltage[bus_name])
         
-        angles = np.array(angles)
-        voltages = np.array(voltages)
+    #     angles = np.array(angles)
+    #     voltages = np.array(voltages)
         
-        # Calculate Jacobian using existing method
-        return self.calc_jacobian(buses, ybus, angles, voltages)
+    #     # Calculate Jacobian using existing method
+    #     return self.calc_jacobian(buses, ybus, angles, voltages)
     
-    def calc_mismatch(self, solution):
-        """
-        Calculate power mismatches using Solution object methods
+    # def calc_mismatch(self, solution):
+    #     """
+    #     Calculate power mismatches using Solution object methods
         
-        Parameters:
-            solution: Solution object with current state variables
+    #     Parameters:
+    #         solution: Solution object with current state variables
             
-        Returns:
-            mismatch: Vector of power mismatches [ΔP; ΔQ]
-        """
-        # Get bus and circuit information
-        circuit = solution.circuit
-        buses = circuit.buses
+    #     Returns:
+    #         mismatch: Vector of power mismatches [ΔP; ΔQ]
+    #     """
+    #     # Get bus and circuit information
+    #     circuit = solution.circuit
+    #     buses = circuit.buses
         
-        # Calculate the actual power injections using Solution methods
-        P_calc = solution.calc_Px()
-        Q_calc = solution.calc_Qx()
+    #     # Calculate the actual power injections using Solution methods
+    #     P_calc = solution.calc_Px()
+    #     Q_calc = solution.calc_Qx()
         
-        # Get the specified powers for each bus
-        P_spec = {}
-        Q_spec = {}
+    #     # Get the specified powers for each bus
+    #     P_spec = {}
+    #     Q_spec = {}
         
-        # Map string bus types to numeric types
-        bus_type_map = {
-            "Slack Bus": BusType.SLACK,
-            "PV Bus": BusType.PV,
-            "PQ Bus": BusType.PQ
-        }
+    #     # Map string bus types to numeric types
+    #     bus_type_map = {
+    #         "Slack Bus": BusType.SLACK,
+    #         "PV Bus": BusType.PV,
+    #         "PQ Bus": BusType.PQ
+    #     }
         
-        # Determine which buses participate in mismatch calculations
-        p_buses = []  # Buses that have P mismatch (all except slack)
-        q_buses = []  # Buses that have Q mismatch (only PQ buses)
+    #     # Determine which buses participate in mismatch calculations
+    #     p_buses = []  # Buses that have P mismatch (all except slack)
+    #     q_buses = []  # Buses that have Q mismatch (only PQ buses)
         
-        for bus_name, bus in buses.items():
-            bus_type = bus_type_map.get(bus.bus_type, bus.bus_type)
+    #     for bus_name, bus in buses.items():
+    #         bus_type = bus_type_map.get(bus.bus_type, bus.bus_type)
             
-            # Get specified values from the bus or load information
-            if hasattr(bus, 'p_specified'):
-                P_spec[bus_name] = bus.p_specified
-            else:
-                # If bus doesn't have specified power, use 0 as default
-                # (this should be updated to properly get specified power from loads)
-                P_spec[bus_name] = 0
+    #         # Get specified values from the bus or load information
+    #         if hasattr(bus, 'p_specified'):
+    #             P_spec[bus_name] = bus.p_specified
+    #         else:
+    #             # If bus doesn't have specified power, use 0 as default
+    #             # (this should be updated to properly get specified power from loads)
+    #             P_spec[bus_name] = 0
                 
-            if hasattr(bus, 'q_specified'):
-                Q_spec[bus_name] = bus.q_specified
-            else:
-                # If bus doesn't have specified power, use 0 as default
-                # (this should be updated to properly get specified power from loads)
-                Q_spec[bus_name] = 0
+    #         if hasattr(bus, 'q_specified'):
+    #             Q_spec[bus_name] = bus.q_specified
+    #         else:
+    #             # If bus doesn't have specified power, use 0 as default
+    #             # (this should be updated to properly get specified power from loads)
+    #             Q_spec[bus_name] = 0
             
-            # Determine which buses participate in mismatch calculations
-            if bus_type != BusType.SLACK:
-                p_buses.append(bus_name)
-            if bus_type == BusType.PQ:
-                q_buses.append(bus_name)
+    #         # Determine which buses participate in mismatch calculations
+    #         if bus_type != BusType.SLACK:
+    #             p_buses.append(bus_name)
+    #         if bus_type == BusType.PQ:
+    #             q_buses.append(bus_name)
         
-        # Apply load information if available
-        if hasattr(circuit, 'load') and circuit.load:
-            for load_name, load in circuit.load.items():
-                bus_name = load.bus.name if hasattr(load.bus, 'name') else load.bus
-                # Add load to specified power (convert to per unit)
-                P_spec[bus_name] += load.real_power / s.base_power
-                Q_spec[bus_name] += load.reactive_power / s.base_power
-        elif hasattr(solution, 'load') and solution.load:
-            bus_name = solution.load.bus.name if hasattr(solution.load.bus, 'name') else solution.load.bus
-            # Add load to specified power (convert to per unit)
-            P_spec[bus_name] += solution.load.real_power / s.base_power
-            Q_spec[bus_name] += solution.load.reactive_power / s.base_power
+    #     # Apply load information if available
+    #     if hasattr(circuit, 'load') and circuit.load:
+    #         for load_name, load in circuit.load.items():
+    #             bus_name = load.bus.name if hasattr(load.bus, 'name') else load.bus
+    #             # Add load to specified power (convert to per unit)
+    #             P_spec[bus_name] += load.real_power / s.base_power
+    #             Q_spec[bus_name] += load.reactive_power / s.base_power
+    #     elif hasattr(solution, 'load') and solution.load:
+    #         bus_name = solution.load.bus.name if hasattr(solution.load.bus, 'name') else solution.load.bus
+    #         # Add load to specified power (convert to per unit)
+    #         P_spec[bus_name] += solution.load.real_power / s.base_power
+    #         Q_spec[bus_name] += solution.load.reactive_power / s.base_power
         
-        # Calculate mismatches (P_specified - P_calculated, Q_specified - Q_calculated)
-        P_mismatch = []
-        Q_mismatch = []
+    #     # Calculate mismatches (P_specified - P_calculated, Q_specified - Q_calculated)
+    #     P_mismatch = []
+    #     Q_mismatch = []
         
-        for bus_name in p_buses:
-            P_mismatch.append(P_spec[bus_name] - P_calc[bus_name])
+    #     for bus_name in p_buses:
+    #         P_mismatch.append(P_spec[bus_name] - P_calc[bus_name])
             
-        for bus_name in q_buses:
-            Q_mismatch.append(Q_spec[bus_name] - Q_calc[bus_name])
+    #     for bus_name in q_buses:
+    #         Q_mismatch.append(Q_spec[bus_name] - Q_calc[bus_name])
         
-        # Combine into a single mismatch vector [ΔP; ΔQ]
-        mismatch = np.concatenate((np.array(P_mismatch), np.array(Q_mismatch)))
+    #     # Combine into a single mismatch vector [ΔP; ΔQ]
+    #     mismatch = np.concatenate((np.array(P_mismatch), np.array(Q_mismatch)))
         
-        return mismatch
+    #     return mismatch
     
-    def newton_raphson_iteration(self, solution, max_iterations=10, tolerance=1e-6):
-        """
-        Perform Newton-Raphson power flow iterations
+    # def newton_raphson_iteration(self, solution, max_iterations=10, tolerance=1e-6):
+    #     """
+    #     Perform Newton-Raphson power flow iterations
         
-        Parameters:
-            solution: Solution object with initial state
-            max_iterations: Maximum number of iterations
-            tolerance: Convergence tolerance for power mismatches
+    #     Parameters:
+    #         solution: Solution object with initial state
+    #         max_iterations: Maximum number of iterations
+    #         tolerance: Convergence tolerance for power mismatches
             
-        Returns:
-            solution: Updated solution object after convergence
-            iterations: Number of iterations performed
-            converged: Boolean indicating whether the solution converged
-        """
-        converged = False
-        iterations = 0
+    #     Returns:
+    #         solution: Updated solution object after convergence
+    #         iterations: Number of iterations performed
+    #         converged: Boolean indicating whether the solution converged
+    #     """
+    #     converged = False
+    #     iterations = 0
         
-        while not converged and iterations < max_iterations:
-            # Calculate mismatch
-            mismatch = self.calc_mismatch(solution)
+    #     while not converged and iterations < max_iterations:
+    #         # Calculate mismatch
+    #         mismatch = self.calc_mismatch(solution)
             
-            # Check for convergence
-            if np.max(np.abs(mismatch)) < tolerance:
-                converged = True
-                break
+    #         # Check for convergence
+    #         if np.max(np.abs(mismatch)) < tolerance:
+    #             converged = True
+    #             break
                 
-            # Calculate Jacobian
-            J = self.calc_jacobian_with_solution(solution)
+    #         # Calculate Jacobian
+    #         J = self.calc_jacobian_with_solution(solution)
             
-            # Solve for state variable updates
-            delta_x = np.linalg.solve(J, mismatch)
+    #         # Solve for state variable updates
+    #         delta_x = np.linalg.solve(J, mismatch)
             
-            # Map string bus types to numeric types
-            bus_type_map = {
-                "Slack Bus": BusType.SLACK,
-                "PV Bus": BusType.PV,
-                "PQ Bus": BusType.PQ
-            }
+    #         # Map string bus types to numeric types
+    #         bus_type_map = {
+    #             "Slack Bus": BusType.SLACK,
+    #             "PV Bus": BusType.PV,
+    #             "PQ Bus": BusType.PQ
+    #         }
             
-            # Update state variables
-            # Determine indices for state variables
-            buses = list(solution.circuit.buses.values())
-            n = len(buses)
+    #         # Update state variables
+    #         # Determine indices for state variables
+    #         buses = list(solution.circuit.buses.values())
+    #         n = len(buses)
             
-            # Create mapping between bus indices and their variables
-            p_index = []     # Buses that contribute to P equations (all except slack)
-            q_index = []     # Buses that contribute to Q equations (only PQ buses)
-            theta_index = [] # Buses whose theta is a variable (all except slack)
-            v_index = []     # Buses whose V is a variable (only PQ buses)
+    #         # Create mapping between bus indices and their variables
+    #         p_index = []     # Buses that contribute to P equations (all except slack)
+    #         q_index = []     # Buses that contribute to Q equations (only PQ buses)
+    #         theta_index = [] # Buses whose theta is a variable (all except slack)
+    #         v_index = []     # Buses whose V is a variable (only PQ buses)
             
-            # Map each bus type to their indices
-            for i, (bus_name, bus) in enumerate(solution.circuit.buses.items()):
-                bus_type = bus_type_map.get(bus.bus_type, bus.bus_type)
+    #         # Map each bus type to their indices
+    #         for i, (bus_name, bus) in enumerate(solution.circuit.buses.items()):
+    #             bus_type = bus_type_map.get(bus.bus_type, bus.bus_type)
                 
-                if bus_type != BusType.SLACK:
-                    p_index.append(i)
-                    theta_index.append(i)
-                if bus_type == BusType.PQ:
-                    q_index.append(i)
-                    v_index.append(i)
+    #             if bus_type != BusType.SLACK:
+    #                 p_index.append(i)
+    #                 theta_index.append(i)
+    #             if bus_type == BusType.PQ:
+    #                 q_index.append(i)
+    #                 v_index.append(i)
             
-            # Extract updates for delta and voltage
-            n_theta = len(theta_index)
-            delta_theta = delta_x[:n_theta]
-            delta_v = delta_x[n_theta:]
+    #         # Extract updates for delta and voltage
+    #         n_theta = len(theta_index)
+    #         delta_theta = delta_x[:n_theta]
+    #         delta_v = delta_x[n_theta:]
             
-            # Apply updates to solution object
-            for i, theta_idx in enumerate(theta_index):
-                bus_name = list(solution.circuit.buses.keys())[theta_idx]
-                solution.delta[bus_name] += delta_theta[i]
+    #         # Apply updates to solution object
+    #         for i, theta_idx in enumerate(theta_index):
+    #             bus_name = list(solution.circuit.buses.keys())[theta_idx]
+    #             solution.delta[bus_name] += delta_theta[i]
                 
-            for i, v_idx in enumerate(v_index):
-                bus_name = list(solution.circuit.buses.keys())[v_idx]
-                solution.voltage[bus_name] += delta_v[i]
+    #         for i, v_idx in enumerate(v_index):
+    #             bus_name = list(solution.circuit.buses.keys())[v_idx]
+    #             solution.voltage[bus_name] += delta_v[i]
             
-            # Recalculate powers with updated state
-            solution.P = solution.calc_Px()
-            solution.Q = solution.calc_Qx()
+    #         # Recalculate powers with updated state
+    #         solution.P = solution.calc_Px()
+    #         solution.Q = solution.calc_Qx()
             
-            iterations += 1
+    #         iterations += 1
         
-        # Update the final mismatch
-        solution.mismatch = self.calc_mismatch(solution)
+    #     # Update the final mismatch
+    #     solution.mismatch = self.calc_mismatch(solution)
         
-        return solution, iterations, converged
+    #     return solution, iterations, converged
     
     def _calc_j1(self, buses, ybus, angles, voltages, p_index, theta_index, bus_type_map):
         """
@@ -312,22 +312,24 @@ class Jacobian:
         for i_idx, i in enumerate(p_index):
             for j_idx, j in enumerate(theta_index):
                 if i == j:
-                    # Diagonal elements
+                    # Diagonal elements (n = k case)
                     sum_term = 0
-                    for k in range(len(buses)):
-                        if k != i:
-                            g_ik = ybus[i, k].real
-                            b_ik = ybus[i, k].imag
-                            theta_ik = angles[i] - angles[k]
-                            sum_term += voltages[k] * (g_ik * np.sin(theta_ik) - b_ik * np.cos(theta_ik))
+                    for n in range(len(buses)):
+                        if n != i:  # n ≠ k
+                            # y_in = ybus[i, n]
+                            y_in_abs = abs(ybus[i, n])
+                            theta_in = np.angle(ybus[i, n])
+                            sum_term += y_in_abs * voltages[n] * np.sin(angles[i] - angles[n] - theta_in)
                     
                     j1[i_idx, j_idx] = -voltages[i] * sum_term
+    
                 else:
                     # Off-diagonal elements
-                    g_ij = ybus[i, j].real
-                    b_ij = ybus[i, j].imag
-                    theta_ij = angles[i] - angles[j]
-                    j1[i_idx, j_idx] = voltages[i] * voltages[j] * (g_ij * np.sin(theta_ij) - b_ij * np.cos(theta_ij))
+                    y_ij = ybus[i, j]
+                    y_ij_abs = abs(y_ij)
+                    theta_ij = np.angle(y_ij)
+                    # j1[i_idx, j_idx] = voltages[i] * voltages[j] * (g_ij * np.sin(theta_ij) - b_ij * np.cos(theta_ij))
+                    j1[i_idx, j_idx] = voltages[i] * voltages[j] * y_ij_abs * np.sin(angles[i] - angles[j] - theta_ij)
         
         return j1
     
@@ -344,28 +346,30 @@ class Jacobian:
         for i_idx, i in enumerate(p_index):
             for j_idx, j in enumerate(v_index):
                 if i == j:
-                    # Diagonal elements
-                    g_ii = ybus[i, i].real
-                    
-                    # First term
-                    first_term = 2 * voltages[i] * g_ii
-                    
-                    # Calculate sum term
+                    # Diagonal elements (n = k case)
                     sum_term = 0
-                    for k in range(len(buses)):
-                        if k != i:
-                            g_ik = ybus[i, k].real
-                            b_ik = ybus[i, k].imag
-                            theta_ik = angles[i] - angles[k]
-                            sum_term += voltages[k] * (g_ik * np.cos(theta_ik) + b_ik * np.sin(theta_ik))
+
+                    y_ii = ybus[i,j]
+                    y_ii_abs = abs(y_ii)
+                    theta_ii = np.angle(y_ii)
+                    first_term = voltages[i] * y_ii_abs * np.cos(theta_ii)
+
+                    for n in range(len(buses)):
+                        if n != i:  # n ≠ k
+                            y_in = ybus[i, n]
+                            y_in_abs = abs(y_in)
+                            theta_in = np.angle(y_in)
+                            sum_term += y_in_abs * voltages[n] * np.cos(angles[i] - angles[n] - theta_in)
                     
                     j2[i_idx, j_idx] = first_term + sum_term
+    
                 else:
                     # Off-diagonal elements
-                    g_ij = ybus[i, j].real
-                    b_ij = ybus[i, j].imag
-                    theta_ij = angles[i] - angles[j]
-                    j2[i_idx, j_idx] = voltages[i] * (g_ij * np.cos(theta_ij) + b_ij * np.sin(theta_ij))
+                    y_ij = ybus[i, j]
+                    y_ij_abs = abs(y_ij)
+                    theta_ij = np.angle(y_ij)
+                    # j2[i_idx, j_idx] = voltages[i] * voltages[j] * (g_ij * np.sin(theta_ij) - b_ij * np.cos(theta_ij))
+                    j2[i_idx, j_idx] = voltages[i] * y_ij_abs * np.cos(angles[i] - angles[j] - theta_ij)
         
         return j2
     
@@ -375,29 +379,32 @@ class Jacobian:
         
         This forms the lower left part of the Jacobian matrix.
         """
-        n_q = len(q_index)
+        n_p = len(q_index)
         n_theta = len(theta_index)
-        j3 = np.zeros((n_q, n_theta))
+        j3 = np.zeros((n_p, n_theta))
         
         for i_idx, i in enumerate(q_index):
             for j_idx, j in enumerate(theta_index):
                 if i == j:
-                    # Diagonal elements
+                    # Diagonal elements (n = k case)
                     sum_term = 0
-                    for k in range(len(buses)):
-                        if k != i:
-                            g_ik = ybus[i, k].real
-                            b_ik = ybus[i, k].imag
-                            theta_ik = angles[i] - angles[k]
-                            sum_term += voltages[k] * (g_ik * np.cos(theta_ik) + b_ik * np.sin(theta_ik))
+
+                    for n in range(len(buses)):
+                        if n != i:  # n ≠ k
+                            y_in = ybus[i, n]
+                            y_in_abs = abs(y_in)
+                            theta_in = np.angle(y_in)
+                            sum_term += y_in_abs * voltages[n] * np.cos(angles[i] - angles[n] - theta_in)
                     
                     j3[i_idx, j_idx] = voltages[i] * sum_term
+    
                 else:
                     # Off-diagonal elements
-                    g_ij = ybus[i, j].real
-                    b_ij = ybus[i, j].imag
-                    theta_ij = angles[i] - angles[j]
-                    j3[i_idx, j_idx] = -voltages[i] * voltages[j] * (g_ij * np.cos(theta_ij) + b_ij * np.sin(theta_ij))
+                    y_ij = ybus[i, j]
+                    y_ij_abs = abs(y_ij)
+                    theta_ij = np.angle(y_ij)
+                    # j3[i_idx, j_idx] = voltages[i] * voltages[j] * (g_ij * np.sin(theta_ij) - b_ij * np.cos(theta_ij))
+                    j3[i_idx, j_idx] = -voltages[i] * voltages[j] * y_ij_abs * np.cos(angles[i] - angles[j] - theta_ij)
         
         return j3
     
@@ -407,35 +414,37 @@ class Jacobian:
         
         This forms the lower right part of the Jacobian matrix.
         """
-        n_q = len(q_index)
+        n_p = len(q_index)
         n_v = len(v_index)
-        j4 = np.zeros((n_q, n_v))
+        j4 = np.zeros((n_p, n_v))
         
         for i_idx, i in enumerate(q_index):
             for j_idx, j in enumerate(v_index):
                 if i == j:
-                    # Diagonal elements
-                    b_ii = ybus[i, i].imag
-                    
-                    # First term
-                    first_term = -2 * voltages[i] * b_ii
-                    
-                    # Calculate sum term
+                    # Diagonal elements (n = k case)
                     sum_term = 0
-                    for k in range(len(buses)):
-                        if k != i:
-                            g_ik = ybus[i, k].real
-                            b_ik = ybus[i, k].imag
-                            theta_ik = angles[i] - angles[k]
-                            sum_term += voltages[k] * (g_ik * np.sin(theta_ik) - b_ik * np.cos(theta_ik))
+
+                    y_ii = ybus[i,j]
+                    y_ii_abs = abs(y_ii)
+                    theta_ii = np.angle(y_ii)
+                    first_term = -voltages[i] * y_ii_abs * np.sin(theta_ii)
+
+                    for n in range(len(buses)):
+                        if n != i:  # n ≠ k
+                            y_in = ybus[i, n]
+                            y_in_abs = abs(y_in)
+                            theta_in = np.angle(y_in)
+                            sum_term += y_in_abs * voltages[n] * np.sin(angles[i] - angles[n] - theta_in)
                     
                     j4[i_idx, j_idx] = first_term + sum_term
+    
                 else:
                     # Off-diagonal elements
-                    g_ij = ybus[i, j].real
-                    b_ij = ybus[i, j].imag
-                    theta_ij = angles[i] - angles[j]
-                    j4[i_idx, j_idx] = voltages[i] * (g_ij * np.sin(theta_ij) - b_ij * np.cos(theta_ij))
+                    y_ij = ybus[i, j]
+                    y_ij_abs = abs(y_ij)
+                    theta_ij = np.angle(y_ij)
+                    # j4[i_idx, j_idx] = voltages[i] * voltages[j] * (g_ij * np.sin(theta_ij) - b_ij * np.cos(theta_ij))
+                    j4[i_idx, j_idx] = voltages[i] * y_ij_abs * np.sin(angles[i] - angles[j] - theta_ij)
         
         return j4
 
@@ -474,37 +483,7 @@ if __name__ == '__main__':
     # Create a load at Bus3
     load = Load("Load1", "Bus3", 50, 30)  # 50 MW, 30 MVAr
 
-    # Create solution object with any bus from the circuit
-    # The bus parameter is now mainly used for reference
-    solution = Solution("Test Solution", bus3, circuit, load)
-
-    # Initialize with a flat start
-    solution.start()
-
     # Create Jacobian instance
     jacobian = Jacobian()
 
-    # Perform Newton-Raphson iterations
-    print("Starting Newton-Raphson iterations...")
-    solution, iterations, converged = jacobian.newton_raphson_iteration(solution)
-
-    if converged:
-        print(f"Converged in {iterations} iterations")
-    else:
-        print(f"Did not converge after {iterations} iterations")
-
-    print("\nFinal State:")
-    print("Bus\t\tVoltage (pu)\tAngle (rad)")
-    for bus_name, voltage in solution.voltage.items():
-        print(f"{bus_name}\t\t{voltage:.4f}\t\t{solution.delta[bus_name]:.4f}")
-
-    print("\nPower Injections:")
-    print("Bus\t\tP (pu)\t\tQ (pu)")
-    for bus_name, p in solution.P.items():
-        q = solution.Q.get(bus_name, "N/A")
-        print(f"{bus_name}\t\t{p:.4f}\t\t{q if q == 'N/A' else f'{q:.4f}'}")
-
-    # Calculate final mismatch to verify solution quality
-    final_mismatch = jacobian.calc_mismatch(solution)
-    print("\nFinal Mismatch (should be close to zero):")
-    print(final_mismatch)
+    print(jacobian.calc_jacobian())

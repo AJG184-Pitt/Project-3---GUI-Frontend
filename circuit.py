@@ -47,12 +47,15 @@ class Circuit:
         self.transmission_lines[name] = transmission_line_obj
 
     def add_load(self, name, bus, real_power, reactive_power):
-        load_obj = Load(name, self.buses[bus], real_power, reactive_power)
-        self.loads[name] = load_obj
+        self.loads[name] = Load(name, self.buses[bus], real_power, reactive_power)
+        #needs to update the bus real and reactive power
+        self.buses[bus].real_power -= real_power
+        self.buses[bus].reactive_power -= reactive_power
 
     def add_generator(self, name, bus, voltage_setpoint, mw_setpoint):
-        generator_obj = Generator(name, bus[bus], voltage_setpoint, mw_setpoint)
-        self.generator = generator_obj
+        self.generator = Generator(name, bus[bus], voltage_setpoint, mw_setpoint)
+        self.buses[bus].real_power += mw_setpoint
+
 
     def calc_ybus(self):
         N = len(self.buses)

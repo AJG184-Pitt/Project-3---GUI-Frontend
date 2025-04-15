@@ -99,50 +99,24 @@ class Solution:
         }
         
         # Create mappings for buses with P and Q mismatches
-        p_buses = []  # P mismatch buses (all except slack)
-        q_buses = []  # Q mismatch buses (only PQ buses)
+        real_power = []  # P mismatch buses (all except slack)
+        reactive_power = []  # Q mismatch buses (only PQ buses)
         
-        # Identify which buses have P and Q mismatches
-        for bus_name, bus in self.circuit.buses.items():
-            bus_type = bus_type_map.get(bus.bus_type, bus.bus_type)
-            
-            if bus_type != 1:  # Not a slack bus
-                p_buses.append(bus_name)
-            if bus_type == 3:  # PQ bus
-                q_buses.append(bus_name)
-        
-        # Initialize specified power values with zeros
-        P_spec = {bus_name: 0 for bus_name in self.circuit.buses.keys()}
-        Q_spec = {bus_name: 0 for bus_name in self.circuit.buses.keys()}
-        
-        # Add load contributions
-        if hasattr(self.circuit, 'load') and self.circuit.load:
-            # Process all loads in the circuit
-            for load_name, load in self.circuit.load.items():
-                bus_name = load.bus.name if hasattr(load.bus, 'name') else load.bus
-                P_spec[bus_name] -= load.real_power / s.base_power  # Negative for loads
-                Q_spec[bus_name] -= load.reactive_power / s.base_power  # Negative for loads
-        elif self.load:
-            # Use the single load passed to constructor
-            bus_name = self.load.bus.name if hasattr(self.load.bus, 'name') else self.load.bus
-            P_spec[bus_name] -= self.load.real_power / s.base_power  # Negative for loads
-            Q_spec[bus_name] -= self.load.reactive_power / s.base_power  # Negative for loads
-        
-        # Add generator contributions if available
-        # This part depends on how generator data is stored in your model
-        # For now, we'll assume generators are attributes of buses
-        for bus_name, bus in self.circuit.buses.items():
-            if hasattr(bus, 'p_gen'):
-                P_spec[bus_name] += bus.p_gen / s.base_power
-            if hasattr(bus, 'q_gen'):
-                Q_spec[bus_name] += bus.q_gen / s.base_power
-        
-        # Create the specified power vectors in the correct order
-        p_vector = [P_spec[bus] for bus in p_buses]
-        q_vector = [Q_spec[bus] for bus in q_buses]
+        # for bus_name in self.circuit.buses.keys():
+        for bus in self.circuit.buses.values():
+            # bus = self.circuit.buses[bus_name]
+            if bus.bus_type != 'Slack Bus':
+                real_power.append(bus.real_power)
+
+        # for bus_name in self.circuit.buses.keys():
+        for bus in self.circuit.buses.values():
+            # bus = self.circuit.buses[bus_name]
+            if bus.bus_type != 'Slack Bus' and bus.bus_type != 'PV Bus':
+                reactive_power.append(bus.reactive_power)
         
         # Combine into a single vector
-        y = np.concatenate((np.array(p_vector), np.array(q_vector)))
+        y = np.concatenate((np.array(real_power), np.array(reactive_power)))
+        y = y / s.base_power
         
         return y
 
@@ -195,10 +169,14 @@ class Solution:
                 Q_spec[bus_name] += bus.q_gen / s.base_power
         
         # Calculate power mismatches
-        p_mismatch = [P_spec[bus] - self.P[bus] for bus in p_buses]
-        q_mismatch = [Q_spec[bus] - self.Q[bus] for bus in q_buses]
-        
+        # p_mismatch = [P_spec[bus] - self.P[bus] for bus in p_buses]
+        # q_mismatch = [Q_spec[bus] - self.Q[bus] for bus in q_buses]
+
+        px_value = list(self.calc_Px().values())
+        qx_value = list(self.calc_Qx().values())
+        combined = np.concatenate((px_value, qx_value))
+
         # Combine into a single mismatch vector
-        mismatch = np.concatenate((np.array(p_mismatch), np.array(q_mismatch)))
+        mismatch = [self.y[i[0]] - combined[i[0]] for i in enumerate(p_buses)]
         
         return mismatch

@@ -19,7 +19,7 @@ class Circuit:
         self.transformers = dict()
         self.transmission_lines = dict()
         self.loads = dict()
-        self.generator = dict()
+        self.generators = dict()
         self.ybus = None
 
     def add_bundle(self, name, num_conductors, spacing, conductor):
@@ -47,15 +47,16 @@ class Circuit:
         self.transmission_lines[name] = transmission_line_obj
 
     def add_load(self, name, bus, real_power, reactive_power):
-        self.loads[name] = Load(name, self.buses[bus], real_power, reactive_power)
-        #needs to update the bus real and reactive power
-        self.buses[bus].real_power = real_power
-        self.buses[bus].reactive_power = reactive_power
+        load_obj = Load(name, self.buses[bus], real_power, reactive_power)
+        self.loads[name] = load_obj
+        # Update the bus real and reactive power
+        self.buses[bus].real_power -= real_power
+        self.buses[bus].reactive_power -= reactive_power
 
     def add_generator(self, name, bus, voltage_setpoint, mw_setpoint):
-        self.generator = Generator(name, self.buses[bus], voltage_setpoint, mw_setpoint)
-        self.buses[bus].real_power = mw_setpoint
-
+        gen_obj = Generator(name, self.buses[bus], voltage_setpoint, mw_setpoint)
+        self.generators[name] = gen_obj  # Store in generators dictionary
+        self.buses[bus].real_power += mw_setpoint
 
     def calc_ybus(self):
         N = len(self.buses)

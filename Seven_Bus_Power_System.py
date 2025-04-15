@@ -106,9 +106,9 @@ solution.start()
 #print("\nPower Injections")
 #print(solution.calc_Px())
 #print(solution.calc_Qx())
+
 print(f"\nSolution x: {solution.x}")
 print(f"\nSolution y: {solution.y}")
 print(f"\nSolution Px: {solution.calc_Px()}")
 print(f"\nSolution Qx: {solution.calc_Qx()}")
 
-print(solution.calc_mismatch())

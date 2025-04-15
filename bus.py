@@ -12,10 +12,10 @@ class Bus:
         self.vpu = 1.0
         self.delta = 0.0
         #need a way to store real and reactive power
+
         self.real_power = 0.0
         self.reactive_power = 0.0
-
-
+        
 if __name__ == '__main__':
     bus1 = Bus("Bus 1", 20, "PV Bus")
     bus2 = Bus("Bus 2", 230, "PQ Bus")

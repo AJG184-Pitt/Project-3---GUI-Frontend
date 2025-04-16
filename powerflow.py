@@ -21,7 +21,7 @@ class PowerFlow:
     
     def __init__(self):
         """Initialize the PowerFlow solver."""
-        self.jacobian = Jacobian()
+        self.jacobian = Jacobian(circuit)
     
     def solve_circuit(self, circuit, tol=0.001, max_iter=50):
         """

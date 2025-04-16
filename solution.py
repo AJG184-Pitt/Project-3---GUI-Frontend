@@ -179,11 +179,32 @@ class Solution:
         # p_mismatch = [P_spec[bus] - self.P[bus] for bus in p_buses]
         # q_mismatch = [Q_spec[bus] - self.Q[bus] for bus in q_buses]
 
-        px_value = list(self.calc_Px().values())
-        qx_value = list(self.calc_Qx().values())
-        combined = np.concatenate((px_value, qx_value))
+        #px_value = list(self.calc_Px().values())
+        #qx_value = list(self.calc_Qx().values())
+        #combined = np.concatenate((px_value, qx_value))
+        px = np.array(list(self.calc_Px().values())).reshape(-1, 1)
+        qx = np.array(list(self.calc_Qx().values())).reshape(-1, 1)
+        combined = np.vstack((px, qx)).flatten()
+
+        y_injected = np.zeros(self.y.size)
+        idx = 0
+
+        bus_list = list(self.circuit.buses.values())
+        for k in range(len(combined)):
+            if k < len(self.circuit.buses):
+                bus = bus_list[k]
+                if bus.bus_type != 'Slack Bus':
+                    y_injected[idx] = combined[k]
+                    idx +=1
+            else:
+                bus = bus_list[k-len(self.circuit.buses)]
+                if bus.bus_type != 'Slack Bus' and bus.bus_type != 'PV Bus':
+                    y_injected[idx] = combined[k]
+                    idx+=1
 
         # Combine into a single mismatch vector
-        mismatch = [self.y[i[0]] - combined[i[0]] for i in enumerate(p_buses)]
+        mismatch = self.y - y_injected
+                    #for i in enumerate(p_buses)]
+        #[i[0]]
         
         return mismatch

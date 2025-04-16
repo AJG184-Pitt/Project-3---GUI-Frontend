@@ -54,7 +54,7 @@ class Circuit:
         self.buses[bus].reactive_power -= reactive_power
 
     def add_generator(self, name, bus, voltage_setpoint, mw_setpoint):
-        self.generator = Generator(name, bus[bus], voltage_setpoint, mw_setpoint)
+        self.generators[name] = Generator(name, self.buses[bus], voltage_setpoint, mw_setpoint)
         self.buses[bus].real_power += mw_setpoint
 
     def calc_ybus(self):

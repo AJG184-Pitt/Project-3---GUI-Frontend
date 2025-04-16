@@ -155,11 +155,16 @@ class Solution:
                 bus_name = load.bus.name if hasattr(load.bus, 'name') else load.bus
                 P_spec[bus_name] -= load.real_power / s.base_power  # Negative for loads
                 Q_spec[bus_name] -= load.reactive_power / s.base_power  # Negative for loads
+        elif isinstance(self.load, dict):
+            for load_name, load in self.load.items():
+                P_spec[bus_name] -= load.real_power / s.base_power
+                Q_spec[bus_name] -= load.reactive_power / s.base_power
+                bus_name = load.bus.name if hasattr(load.bus, 'name') else load.bus
         elif self.load:
-            # Use the single load passed to constructor
+            # fallback for a single Load object
             bus_name = self.load.bus.name if hasattr(self.load.bus, 'name') else self.load.bus
-            P_spec[bus_name] -= self.load.real_power / s.base_power  # Negative for loads
-            Q_spec[bus_name] -= self.load.reactive_power / s.base_power  # Negative for loads
+            P_spec[bus_name] -= self.load.real_power / s.base_power
+            Q_spec[bus_name] -= self.load.reactive_power / s.base_power
         
         # Add generator contributions if available
         for bus_name, bus in self.circuit.buses.items():

@@ -167,14 +167,7 @@ class Solution:
                 P_spec[bus_name] += bus.p_gen / s.base_power
             if hasattr(bus, 'q_gen'):
                 Q_spec[bus_name] += bus.q_gen / s.base_power
-
-        # bus_names = list(self.circuit.buses.keys())
-        # Px_values = np.array(list(self.calc_Px().values()))
-        # Qx_values = np.array(list(self.calc_Qx().values()))
-        # combined = np.concatenate((Px_values, Qx_values))  # Create a 2D array
         
-        # combined = np.concatenate(self.calc_Px(), self.calc_Qx())
-
         # Calculate power mismatches
         # p_mismatch = [P_spec[bus] - self.P[bus] for bus in p_buses]
         # q_mismatch = [Q_spec[bus] - self.Q[bus] for bus in q_buses]

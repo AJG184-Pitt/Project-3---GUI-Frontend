@@ -113,7 +113,3 @@ print(f"\nSolution y: {solution.y}")
 print(f"\nSolution Px: {solution.calc_Px()}")
 print(f"\nSolution Qx: {solution.calc_Qx()}")
 print(f"\nSolution Mismatch: {solution.calc_mismatch()}")
-
-
-
-

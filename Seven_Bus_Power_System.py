@@ -3,6 +3,7 @@ from jacobian import Jacobian
 import numpy as np
 from powerflow import PowerFlow
 from solution import Solution
+from load import Load
 
 circuit1 = Circuit("Test Circuit")
 
@@ -21,7 +22,7 @@ circuit1.buses["Bus3"].bus_type = 'PQ Bus'
 circuit1.buses["Bus4"].bus_type = 'PQ Bus'
 circuit1.buses["Bus5"].bus_type = 'PQ Bus'
 circuit1.buses["Bus6"].bus_type = 'PQ Bus'
-circuit1.buses["Bus7"].bus_type = 'PV Bus'
+circuit1.buses["Bus7"].bus_type = 'PV Bus' #generator bus type
 
 circuit1.buses["Bus1"].vpu = 1.0  # Slack bus voltage
 circuit1.buses["Bus1"].delta = 0.0
@@ -51,12 +52,16 @@ circuit1.add_transmission_line("L5", "Bus5", "Bus6", "B1", "C1", "G1", 10)
 circuit1.add_transmission_line("L6", "Bus4", "Bus5", "B1", "C1", "G1", 35)
 
 #adding the loads
-circuit1.add_load("load2", "Bus2", 0, 0)
+circuit1.add_load("Load2", "Bus2", 0, 0)
 circuit1.add_load("Load3","Bus3", 110, 50 )
 circuit1.add_load("Load4", "Bus4", 100, 70)
 circuit1.add_load("Load5", "Bus5", 100, 65)
 circuit1.add_load("Load6", "Bus6", 0, 0)
 # circuit1.add_load("Load7", "Bus7", 0, 0)
+
+#adding the generators
+circuit1.add_generator("G1", "Bus1", 1.0 ,0.0)
+circuit1.add_generator("G7", "Bus7", 1.0, 200)
 
 np.set_printoptions(threshold=np.inf, linewidth=np.inf)
 
@@ -96,8 +101,11 @@ if 'p_calc' in results and 'q_calc' in results:
 solution = Solution("Solution 1", circuit1.buses.values(), circuit1, circuit1.loads)
 solution.start()
 
-print("\nSolution Power Mismatch")
+#print("\nSolution Power Mismatch")
+#print(solution.calc_mismatch())
+#print("\nPower Injections")
+#print(solution.calc_Px())
+#print(solution.calc_Qx())
+print(solution.x)
+print(solution.y)
 print(solution.calc_mismatch())
-print("\nPower Injections")
-print(solution.calc_Px())
-print(solution.calc_Qx())

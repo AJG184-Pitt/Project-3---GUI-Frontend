@@ -70,14 +70,15 @@ circuit1.print_ybus()
 
 angles = np.array([bus.delta for bus in circuit1.buses.values()])
 voltages = np.array([bus.vpu for bus in circuit1.buses.values()])
-jacobian = Jacobian()
+jacobian = Jacobian(circuit1)
 
 J = jacobian.calc_jacobian(circuit1.buses.values(), circuit1.ybus, angles, voltages)
 print("\nJacobian Matrix:")
-print(J)
+print(np.round(J,2))
 
-powerflow = PowerFlow()
-results = powerflow.solve_circuit(circuit1)
+'''
+#powerflow = PowerFlow()
+#results = powerflow.solve_circuit(circuit1)
 
 # Print results
 print("\nPower Flow Solution:")
@@ -97,7 +98,7 @@ if 'p_calc' in results and 'q_calc' in results:
         p = results['p_calc'][i]
         q = results['q_calc'][i]
         print(f"{bus_name}: P = {p:.4f} p.u., Q = {q:.4f} p.u.")
-
+'''
 solution = Solution("Solution 1", circuit1.buses.values(), circuit1, circuit1.loads)
 solution.start()
 
@@ -111,7 +112,7 @@ print(f"\nSolution x: {solution.x}")
 print(f"\nSolution y: {solution.y}")
 print(f"\nSolution Px: {solution.calc_Px()}")
 print(f"\nSolution Qx: {solution.calc_Qx()}")
-print(f"\n Solution Mismatch: {solution.calc_mismatch()}")
+print(f"\nSolution Mismatch: {solution.calc_mismatch()}")
 
 
 

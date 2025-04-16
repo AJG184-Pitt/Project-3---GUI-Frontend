@@ -102,18 +102,21 @@ class Solution:
         real_power = []  # P mismatch buses (all except slack)
         reactive_power = []  # Q mismatch buses (only PQ buses)
         
-        for bus_name in self.circuit.buses.keys():
-            bus = self.circuit.buses[bus_name]
-            if bus.bus_type != "Slack Bus":
+        # for bus_name in self.circuit.buses.keys():
+        for bus in self.circuit.buses.values():
+            # bus = self.circuit.buses[bus_name]
+            if bus.bus_type != 'Slack Bus':
                 real_power.append(bus.real_power)
 
-        for bus_name in self.circuit.buses.keys():
-            bus = self.circuit.buses[bus_name]
-            if bus.bus_type != "Slack Bus" or bus.bus_type != "PV Bus":
+        # for bus_name in self.circuit.buses.keys():
+        for bus in self.circuit.buses.values():
+            # bus = self.circuit.buses[bus_name]
+            if bus.bus_type != 'Slack Bus' and bus.bus_type != 'PV Bus':
                 reactive_power.append(bus.reactive_power)
         
         # Combine into a single vector
         y = np.concatenate((np.array(real_power), np.array(reactive_power)))
+        y = y / s.base_power
         
         return y
 
@@ -166,17 +169,21 @@ class Solution:
                 Q_spec[bus_name] += bus.q_gen / s.base_power
 
         # bus_names = list(self.circuit.buses.keys())
-        Px_values = np.array(list(self.calc_Px().values()))
-        Qx_values = np.array(list(self.calc_Qx().values()))
-        combined = np.concatenate((Px_values, Qx_values))  # Create a 2D array
+        # Px_values = np.array(list(self.calc_Px().values()))
+        # Qx_values = np.array(list(self.calc_Qx().values()))
+        # combined = np.concatenate((Px_values, Qx_values))  # Create a 2D array
         
         # combined = np.concatenate(self.calc_Px(), self.calc_Qx())
 
         # Calculate power mismatches
-        mismatch = [self.y[i[0]] - combined[i[0]] for i in enumerate(p_buses)]
+        # p_mismatch = [P_spec[bus] - self.P[bus] for bus in p_buses]
+        # q_mismatch = [Q_spec[bus] - self.Q[bus] for bus in q_buses]
 
-        # mismatch = []
-        # for i, bus_name in enumerate(bus_names):
-        #     mismatch.append(self.y - Px_values[i] - Qx_values[i])
-                
+        px_value = list(self.calc_Px().values())
+        qx_value = list(self.calc_Qx().values())
+        combined = np.concatenate((px_value, qx_value))
+
+        # Combine into a single mismatch vector
+        mismatch = [self.y[i[0]] - combined[i[0]] for i in enumerate(p_buses)]
+        
         return mismatch

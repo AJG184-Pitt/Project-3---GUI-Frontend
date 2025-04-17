@@ -12,8 +12,8 @@ class BusType:
     PQ = 3
 
 class Jacobian:
-    def __init__(self):
-        pass
+    def __init__(self, circuit: Circuit):
+        self.circuit = circuit
 
     def calc_jacobian(self, buses, ybus, angles, voltages):
         """
@@ -308,28 +308,31 @@ class Jacobian:
         n_p = len(p_index)
         n_theta = len(theta_index)
         j1 = np.zeros((n_p, n_theta))
-        
-        for i_idx, i in enumerate(p_index):
-            for j_idx, j in enumerate(theta_index):
-                if i == j:
+        all_buses = [bus for bus in self.circuit.buses.values() if bus.bus_type != 'Slack Bus']
+        bus_names = list(self.circuit.buses.values())
+        for i, bus_i in enumerate(all_buses):
+            k = bus_names.index(bus_i)
+            for j, bus_j in enumerate(all_buses):
+                l = bus_names.index(bus_j)
+                if k == l:
                     # Diagonal elements (n = k case)
                     sum_term = 0
                     for n in range(len(buses)):
-                        if n != i:  # n ≠ k
+                        if n != k:  # n ≠ k
                             # y_in = ybus[i, n]
-                            y_in_abs = abs(ybus[i, n])
-                            theta_in = np.angle(ybus[i, n])
-                            sum_term += y_in_abs * voltages[n] * np.sin(angles[i] - angles[n] - theta_in)
+                            y_in_abs = abs(ybus[k, n])
+                            theta_in = np.angle(ybus[k, n])
+                            sum_term += y_in_abs * voltages[n] * np.sin(angles[k] - angles[n] - theta_in)
                     
-                    j1[i_idx, j_idx] = -voltages[i] * sum_term
+                    j1[i, j] = -voltages[k] * sum_term
     
                 else:
                     # Off-diagonal elements
-                    y_ij = ybus[i, j]
+                    y_ij = ybus[k, l]
                     y_ij_abs = abs(y_ij)
                     theta_ij = np.angle(y_ij)
                     # j1[i_idx, j_idx] = voltages[i] * voltages[j] * (g_ij * np.sin(theta_ij) - b_ij * np.cos(theta_ij))
-                    j1[i_idx, j_idx] = voltages[i] * voltages[j] * y_ij_abs * np.sin(angles[i] - angles[j] - theta_ij)
+                    j1[i, j] = voltages[k] * voltages[l] * y_ij_abs * np.sin(angles[k] - angles[l] - theta_ij)
         
         return j1
     
@@ -342,34 +345,37 @@ class Jacobian:
         n_p = len(p_index)
         n_v = len(v_index)
         j2 = np.zeros((n_p, n_v))
-        
-        for i_idx, i in enumerate(p_index):
-            for j_idx, j in enumerate(v_index):
-                if i == j:
+        all_buses = [bus for bus in self.circuit.buses.values() if bus.bus_type != 'Slack Bus']
+        pq_buses = [bus for bus in self.circuit.buses.values() if bus.bus_type != 'Slack Bus' and bus.bus_type != "PV Bus"]
+        bus_names = list(self.circuit.buses.values())
+        for i, bus_i in enumerate(all_buses):
+            k = bus_names.index(bus_i)
+            for j, bus_j in enumerate(pq_buses):
+                l = bus_names.index(bus_j)
+                if k == l:
                     # Diagonal elements (n = k case)
                     sum_term = 0
 
-                    y_ii = ybus[i,j]
+                    y_ii = ybus[k,l]
                     y_ii_abs = abs(y_ii)
                     theta_ii = np.angle(y_ii)
-                    first_term = voltages[i] * y_ii_abs * np.cos(theta_ii)
+                    first_term = voltages[k] * y_ii_abs * np.cos(theta_ii)
 
                     for n in range(len(buses)):
-                        if n != i:  # n ≠ k
-                            y_in = ybus[i, n]
-                            y_in_abs = abs(y_in)
-                            theta_in = np.angle(y_in)
-                            sum_term += y_in_abs * voltages[n] * np.cos(angles[i] - angles[n] - theta_in)
+                        y_in = ybus[k, n]
+                        y_in_abs = abs(y_in)
+                        theta_in = np.angle(y_in)
+                        sum_term += y_in_abs * voltages[n] * np.cos(angles[k] - angles[n] - theta_in)
                     
-                    j2[i_idx, j_idx] = first_term + sum_term
+                    j2[i, j] = first_term + sum_term
     
                 else:
                     # Off-diagonal elements
-                    y_ij = ybus[i, j]
+                    y_ij = ybus[k, l]
                     y_ij_abs = abs(y_ij)
                     theta_ij = np.angle(y_ij)
                     # j2[i_idx, j_idx] = voltages[i] * voltages[j] * (g_ij * np.sin(theta_ij) - b_ij * np.cos(theta_ij))
-                    j2[i_idx, j_idx] = voltages[i] * y_ij_abs * np.cos(angles[i] - angles[j] - theta_ij)
+                    j2[i, j] = voltages[k] * y_ij_abs * np.cos(angles[k] - angles[l] - theta_ij)
         
         return j2
     
@@ -382,29 +388,33 @@ class Jacobian:
         n_p = len(q_index)
         n_theta = len(theta_index)
         j3 = np.zeros((n_p, n_theta))
-        
-        for i_idx, i in enumerate(q_index):
-            for j_idx, j in enumerate(theta_index):
-                if i == j:
+        all_buses = [bus for bus in self.circuit.buses.values() if bus.bus_type != 'Slack Bus']
+        pq_buses = [bus for bus in self.circuit.buses.values() if bus.bus_type != 'Slack Bus' and bus.bus_type != "PV Bus"]
+        bus_names = list(self.circuit.buses.values())
+        for i, bus_i in enumerate(pq_buses):
+            k = bus_names.index(bus_i)
+            for j, bus_j in enumerate(all_buses):
+                l = bus_names.index(bus_j)
+                if k == l:
                     # Diagonal elements (n = k case)
                     sum_term = 0
 
                     for n in range(len(buses)):
-                        if n != i:  # n ≠ k
-                            y_in = ybus[i, n]
+                        if n != k:  # n ≠ k
+                            y_in = ybus[k, n]
                             y_in_abs = abs(y_in)
                             theta_in = np.angle(y_in)
-                            sum_term += y_in_abs * voltages[n] * np.cos(angles[i] - angles[n] - theta_in)
+                            sum_term += y_in_abs * voltages[n] * np.cos(angles[k] - angles[n] - theta_in)
                     
-                    j3[i_idx, j_idx] = voltages[i] * sum_term
+                    j3[i, j] = voltages[k] * sum_term
     
                 else:
                     # Off-diagonal elements
-                    y_ij = ybus[i, j]
+                    y_ij = ybus[k, l]
                     y_ij_abs = abs(y_ij)
                     theta_ij = np.angle(y_ij)
                     # j3[i_idx, j_idx] = voltages[i] * voltages[j] * (g_ij * np.sin(theta_ij) - b_ij * np.cos(theta_ij))
-                    j3[i_idx, j_idx] = -voltages[i] * voltages[j] * y_ij_abs * np.cos(angles[i] - angles[j] - theta_ij)
+                    j3[i, j] = -voltages[k] * voltages[l] * y_ij_abs * np.cos(angles[k] - angles[l] - theta_ij)
         
         return j3
     
@@ -417,34 +427,36 @@ class Jacobian:
         n_p = len(q_index)
         n_v = len(v_index)
         j4 = np.zeros((n_p, n_v))
-        
-        for i_idx, i in enumerate(q_index):
-            for j_idx, j in enumerate(v_index):
-                if i == j:
+        pq_buses = [bus for bus in self.circuit.buses.values() if bus.bus_type != 'Slack Bus' and bus.bus_type != "PV Bus"]
+        bus_names = list(self.circuit.buses.values())
+        for i, bus_i in enumerate(pq_buses):
+            k = bus_names.index(bus_i)
+            for j, bus_j in enumerate(pq_buses):
+                l = bus_names.index(bus_j)
+                if k == l:
                     # Diagonal elements (n = k case)
                     sum_term = 0
 
-                    y_ii = ybus[i,j]
+                    y_ii = ybus[k,l]
                     y_ii_abs = abs(y_ii)
                     theta_ii = np.angle(y_ii)
-                    first_term = -voltages[i] * y_ii_abs * np.sin(theta_ii)
+                    first_term = -voltages[k] * y_ii_abs * np.sin(theta_ii)
 
                     for n in range(len(buses)):
-                        if n != i:  # n ≠ k
-                            y_in = ybus[i, n]
-                            y_in_abs = abs(y_in)
-                            theta_in = np.angle(y_in)
-                            sum_term += y_in_abs * voltages[n] * np.sin(angles[i] - angles[n] - theta_in)
+                        y_in = ybus[k, n]
+                        y_in_abs = abs(y_in)
+                        theta_in = np.angle(y_in)
+                        sum_term += y_in_abs * voltages[n] * np.sin(angles[k] - angles[n] - theta_in)
                     
-                    j4[i_idx, j_idx] = first_term + sum_term
+                    j4[i, j] = first_term + sum_term
     
                 else:
                     # Off-diagonal elements
-                    y_ij = ybus[i, j]
+                    y_ij = ybus[k, l]
                     y_ij_abs = abs(y_ij)
                     theta_ij = np.angle(y_ij)
                     # j4[i_idx, j_idx] = voltages[i] * voltages[j] * (g_ij * np.sin(theta_ij) - b_ij * np.cos(theta_ij))
-                    j4[i_idx, j_idx] = voltages[i] * y_ij_abs * np.sin(angles[i] - angles[j] - theta_ij)
+                    j4[i, j] = voltages[k] * y_ij_abs * np.sin(angles[k] - angles[l] - theta_ij)
         
         return j4
 

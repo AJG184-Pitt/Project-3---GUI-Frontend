@@ -24,11 +24,11 @@ circuit1.buses["Bus5"].bus_type = 'PQ Bus'
 circuit1.buses["Bus6"].bus_type = 'PQ Bus'
 circuit1.buses["Bus7"].bus_type = 'PV Bus' #generator bus type
 
-circuit1.buses["Bus1"].vpu = 1.0  # Slack bus voltage
-circuit1.buses["Bus1"].delta = 0.0
+#circuit1.buses["Bus1"].vpu = 1.0  # Slack bus voltage
+#circuit1.buses["Bus1"].delta = 0.0
 # circuit1.buses["Bus2"].vpu = 1.0  # PV bus voltage (if it's a PV bus)
-circuit1.buses["Bus7"].vpu = 1.0  # PV bus voltage
-circuit1.buses["Bus7"].real_power = -200
+#circuit1.buses["Bus7"].vpu = 1.0  # PV bus voltage
+#circuit1.buses["Bus7"].real_power = 200
 
 #adding the 2 transformers
 circuit1.add_transformer("T1", "Bus1", "Bus2", 125, 8.5, 10 )
@@ -52,7 +52,7 @@ circuit1.add_transmission_line("L5", "Bus5", "Bus6", "B1", "C1", "G1", 10)
 circuit1.add_transmission_line("L6", "Bus4", "Bus5", "B1", "C1", "G1", 35)
 
 #adding the loads
-circuit1.add_load("Load2", "Bus2", 0, 0)
+circuit1.add_load("load2", "Bus2", 0, 0)
 circuit1.add_load("Load3","Bus3", 110, 50 )
 circuit1.add_load("Load4", "Bus4", 100, 70)
 circuit1.add_load("Load5", "Bus5", 100, 65)
@@ -111,3 +111,8 @@ print(f"\nSolution x: {solution.x}")
 print(f"\nSolution y: {solution.y}")
 print(f"\nSolution Px: {solution.calc_Px()}")
 print(f"\nSolution Qx: {solution.calc_Qx()}")
+print(f"\n Solution Mismatch: {solution.calc_mismatch()}")
+
+
+
+

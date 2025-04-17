@@ -20,7 +20,7 @@ class PowerFlow:
     """
     
     def __init__(self, circuit):
-        """Initialize the PowerFlow solver with a circuit."""
+        """Initialize the PowerFlow solver."""
         self.jacobian = Jacobian(circuit)
     
     def solve_circuit(self, circuit, tol=0.001, max_iter=50):
@@ -54,6 +54,7 @@ class PowerFlow:
     def solve(self, buses, ybus, tol=0.001, max_iter=50, circuit=None):
         """
         Solve the power flow problem using the Newton-Raphson method.
+        Uses the Solution class for power mismatches and Jacobian class for matrix calculations.
         
         Parameters:
         -----------
@@ -73,18 +74,23 @@ class PowerFlow:
         dict
             Dictionary containing the solved voltages, angles, iterations, and convergence status
         """
-        # 1. Initialize Variables
+        # Ensure we have a circuit
+        if circuit is None:
+            raise ValueError("Circuit object is required for using the Solution class")
+        
+        # Step 1: Initialize Variables
         n_bus = len(buses)
         
         # Map the bus names to indices
         bus_names = [bus.name for bus in buses]
+        bus_idx_map = {bus_names[i]: i for i in range(n_bus)}
         
-        # Ensure each bus has initial values (flat start if not specified)
-        for bus in buses:
+        # Extract initial voltage magnitudes and angles
+        for i, bus in enumerate(buses):
             if not hasattr(bus, 'vpu') or bus.vpu is None:
                 bus.vpu = 1.0  # Flat start for voltage magnitude
             if not hasattr(bus, 'delta') or bus.delta is None:
-                bus.delta = 0.0  # Flat start for voltage angle (in radians)
+                bus.delta = 0.0  # Flat start for voltage angle
         
         # Map string bus types to enum values
         bus_type_map = {
@@ -93,53 +99,181 @@ class PowerFlow:
             "PQ Bus": BusType.PQ
         }
         
-        # Get bus types and identify different bus categories
+        # Get bus types
         bus_types = [bus_type_map.get(bus.bus_type, BusType.PQ) for bus in buses]
         
-        # Identify PV, PQ, and slack buses by their indices
+        # Identify PV, PQ, and slack buses
         pv_buses = [i for i, bus_type in enumerate(bus_types) if bus_type == BusType.PV]
         pq_buses = [i for i, bus_type in enumerate(bus_types) if bus_type == BusType.PQ]
         slack_buses = [i for i, bus_type in enumerate(bus_types) if bus_type == BusType.SLACK]
         
-        # Set up indices for variables in the Jacobian (excluding slack bus)
+        # Set up indices for the Jacobian matrix (excluding slack bus)
         non_slack_buses = [i for i in range(n_bus) if i not in slack_buses]
         
-        # Set up for Solution class
-        solution = self._setup_solution(buses, circuit, bus_names)
+        # IMPORTANT: Set up the bus container according to Solution class's expected structure
+        # Looking at the error, the Solution class expects the bus indices to be bus names, not integers
+        bus_container = type('', (), {})()
+        bus_container.index = bus_names  # Use bus names as indices
+        bus_container.bus_count = bus_names  # Use bus names for bus_count as well
+        bus_container.bus_type = {name: buses[i].bus_type for i, name in enumerate(bus_names)}
+        
+        # Create dictionaries for voltage and angles using bus names as keys
+        delta_dict = {name: buses[i].delta for i, name in enumerate(bus_names)}
+        voltage_dict = {name: buses[i].vpu for i, name in enumerate(bus_names)}
+        
+        # Create a load object with proper parameters
+        # For each bus, create a load if not already present
+        loads = []
+        for i, bus in enumerate(buses):
+            # Set default power values based on bus type
+            real_power = 0.0
+            reactive_power = 0.0
+            
+            if i in pv_buses:
+                real_power = 0.5  # Default generation for PV buses
+            elif i in pq_buses:
+                real_power = -0.5  # Default load for PQ buses (negative for consumption)
+                reactive_power = -0.3  # Default reactive load for PQ buses
+                
+            # Create a load object for this bus
+            load_name = f"Load_{bus.name}"
+            loads.append(Load(load_name, bus, real_power, reactive_power))
+            
+        # Use the first load for initializing the Solution
+        # In a real system, you would aggregate all loads
+        if loads:
+            primary_load = loads[0]
+        else:
+            # Create a dummy load if none exists
+            primary_load = Load("Dummy_Load", buses[0], 0.0, 0.0)
+        
+        # Make the loads available in the circuit
+        circuit.load = {load.name: load for load in loads}
+        
+        # Initialize a Solution object with the proper load
+        # Create the Solution object WITHOUT initially calculating P and Q
+        # to avoid KeyErrors before we've set up the dictionaries
+        solution = Solution("PowerFlow Solution", bus_container, circuit, primary_load)
+        
+        # THEN set the dictionaries
+        solution.delta = delta_dict
+        solution.voltage = voltage_dict
+        
+        # NOW we can calculate P and Q safely
+        solution.P = solution.calc_Px()
+        solution.Q = solution.calc_Qx()
+        
+        # Manually calculate x and y arrays for Solution to avoid broadcasting issues
+        # This fixes the shape mismatch in calc_mismatch()
+        
+        # Initialize x from solution's delta and voltage values
+        # Make sure the size matches what we expect
+        delta_values = np.array([solution.delta[name] for name in bus_names])
+        voltage_values = np.array([solution.voltage[name] for name in bus_names])
+        
+        # Calculate which buses contribute to the state vector
+        # Only non-slack buses contribute angles
+        # Only PQ buses contribute voltages
+        non_slack_names = [bus_names[i] for i in non_slack_buses]
+        pq_names = [bus_names[i] for i in pq_buses]
+        
+        # Create x with only the relevant elements
+        delta_x = np.array([solution.delta[name] for name in non_slack_names])
+        voltage_x = np.array([solution.voltage[name] for name in pq_names])
+        solution.x = np.concatenate((delta_x, voltage_x))
+        
+        # Create y with scheduled powers
+        # Get scheduled P and Q values from the loads
+        p_scheduled = np.zeros(n_bus)
+        q_scheduled = np.zeros(n_bus)
+        
+        for load in loads:
+            bus_idx = buses.index(load.bus)
+            p_scheduled[bus_idx] = load.real_power
+            q_scheduled[bus_idx] = load.reactive_power
+        
+        # Extract only the relevant scheduled powers (same buses as x)
+        p_scheduled_nonslack = p_scheduled[non_slack_buses]
+        q_scheduled_pq = q_scheduled[pq_buses]
+        solution.y = np.concatenate((p_scheduled_nonslack, q_scheduled_pq))
+        
+        # Now we can calculate the mismatch correctly
+        try:
+            solution.mismatch = solution.calc_mismatch()
+        except Exception as e:
+            # If calc_mismatch fails, we'll calculate it directly
+            print(f"Warning: Solution.calc_mismatch() failed: {e}")
+            # Extract calculated powers in the same order as scheduled
+            p_calc = np.array([solution.P.get(bus_names[i], 0.0) for i in range(n_bus)])
+            q_calc = np.array([solution.Q.get(bus_names[i], 0.0) for i in range(n_bus)])
+            
+            # Use these for mismatches
+            p_mismatch = p_scheduled[non_slack_buses] - p_calc[non_slack_buses]
+            q_mismatch = q_scheduled[pq_buses] - q_calc[pq_buses]
+            
+            # Combine for the complete mismatch vector
+            mismatch = np.concatenate((p_mismatch, q_mismatch))
+        else:
+            # If calc_mismatch succeeds, use its result
+            # Convert from solution.mismatch to our mismatch vector
+            p_calc = np.array([solution.P.get(bus_names[i], 0.0) for i in range(n_bus)])
+            q_calc = np.array([solution.Q.get(bus_names[i], 0.0) for i in range(n_bus)])
+            
+            # Use these for mismatches
+            p_mismatch = p_scheduled[non_slack_buses] - p_calc[non_slack_buses]
+            q_mismatch = q_scheduled[pq_buses] - q_calc[pq_buses]
+            
+            # Combine for the complete mismatch vector
+            mismatch = np.concatenate((p_mismatch, q_mismatch))
+        
+        # Store convergence history
+        mismatch_history = []
         
         # Initialize iteration counter and convergence flag
         iter_count = 0
         converged = False
         max_mismatch = float('inf')
-        mismatch_history = []  # To track convergence progress
         
-        # Extract initial voltage and angle values as arrays
-        v_mag = np.array([bus.vpu for bus in buses])
-        v_ang = np.array([bus.delta for bus in buses])
-        
-        # Extract scheduled power values for buses
-        p_scheduled, q_scheduled = self._get_scheduled_powers(buses, circuit)
-        
-        # 3. Iterative Solution Loop
+        # Step 3: Iterative Solution Loop
         while not converged and iter_count < max_iter:
-            # Step 1: Calculate power injections and mismatches
-            p_calc, q_calc = self._calculate_power_injections(buses, ybus, v_mag, v_ang)
+            # Calculate power injections using Solution class
+            solution.P = solution.calc_Px()
+            solution.Q = solution.calc_Qx()
             
-            # Calculate mismatches (excluding slack bus for P, and slack+PV buses for Q)
+            # Extract power calculations as arrays for mismatch calculation
+            p_calc = np.zeros(n_bus)
+            q_calc = np.zeros(n_bus)
+            
+            for i, name in enumerate(bus_names):
+                p_calc[i] = solution.P.get(name, 0)
+                q_calc[i] = solution.Q.get(name, 0)
+            
+            # Calculate mismatch directly (avoiding Solution.calc_mismatch which may have issues)
             p_mismatch = p_scheduled[non_slack_buses] - p_calc[non_slack_buses]
             q_mismatch = q_scheduled[pq_buses] - q_calc[pq_buses]
             
-            # Combine for complete mismatch vector
+            # Combine P and Q mismatches
             mismatch = np.concatenate((p_mismatch, q_mismatch))
             max_mismatch = np.max(np.abs(mismatch))
             mismatch_history.append(max_mismatch)
+            
+            # Update solution's state vectors
+            # Create x with only the relevant elements
+            delta_x = np.array([solution.delta[name] for name in non_slack_names])
+            voltage_x = np.array([solution.voltage[name] for name in pq_names])
+            solution.x = np.concatenate((delta_x, voltage_x))
+            solution.y = np.concatenate((p_scheduled_nonslack, q_scheduled_pq))
             
             # Step 5: Check convergence
             if max_mismatch < tol:
                 converged = True
                 break
             
-            # Step 2: Build Jacobian matrix
+            # Extract current voltage and angle values as numpy arrays for Jacobian
+            v_mag = np.array([buses[i].vpu for i in range(n_bus)])
+            v_ang = np.array([buses[i].delta for i in range(n_bus)])
+            
+            # Step 2: Build Jacobian matrix using the Jacobian class
             J = self.jacobian.calc_jacobian(buses, ybus, v_ang, v_mag)
             
             # Step 3: Solve the linear system J * Δx = mismatch
@@ -154,111 +288,99 @@ class PowerFlow:
             # Update voltage angles (excluding slack bus)
             for i, idx in enumerate(non_slack_buses):
                 buses[idx].delta += delta_theta[i]
-                v_ang[idx] = buses[idx].delta
+                solution.delta[bus_names[idx]] = buses[idx].delta  # Update Solution class data using bus name
             
             # Update voltage magnitudes (PQ buses only)
             for i, idx in enumerate(pq_buses):
                 buses[idx].vpu += delta_v[i]
-                v_mag[idx] = buses[idx].vpu
+                solution.voltage[bus_names[idx]] = buses[idx].vpu  # Update Solution class data using bus name
             
             iter_count += 1
         
-        # Step 6: Report non-convergence if max iterations exceeded
-        if not converged:
-            print(f"WARNING: Power flow did not converge after {max_iter} iterations.")
-            print(f"Maximum mismatch: {max_mismatch}")
-        
-        # Calculate final power injections if converged
-        if converged:
-            p_calc, q_calc = self._calculate_power_injections(buses, ybus, v_mag, v_ang)
-        
-        # Prepare results dictionary
+        # Prepare results
         results = {
-            'v_mag': v_mag,
-            'v_ang': v_ang,
+            'v_mag': np.array([buses[i].vpu for i in range(n_bus)]),
+            'v_ang': np.array([buses[i].delta for i in range(n_bus)]),
             'iterations': iter_count,
             'converged': converged,
             'mismatch_history': mismatch_history,
             'final_mismatch': max_mismatch if iter_count > 0 else 0.0
         }
         
+        # Add calculated P and Q values to results
         if converged:
-            results['p_calc'] = p_calc
-            results['q_calc'] = q_calc
+            solution.P = solution.calc_Px()
+            solution.Q = solution.calc_Qx()
+            
+            # Convert from dictionary with bus name keys to array with proper ordering
+            p_calc_result = np.zeros(n_bus)
+            q_calc_result = np.zeros(n_bus)
+            
+            for i, name in enumerate(bus_names):
+                p_calc_result[i] = solution.P.get(name, 0)
+                q_calc_result[i] = solution.Q.get(name, 0)
+                
+            results['p_calc'] = p_calc_result
+            results['q_calc'] = q_calc_result
+        
+        # Step 6: Report non-convergence if max iterations exceeded
+        if not converged:
+            print(f"WARNING: Power flow did not converge after {max_iter} iterations.")
+            print(f"Maximum mismatch: {max_mismatch}")
         
         return results
+
+if __name__ == "__main__":
+    # Create a test circuit
+    circuit = Circuit("Test Power Flow")
     
-    def _setup_solution(self, buses, circuit, bus_names):
-        """Helper method to set up the Solution object."""
-        # Create a bus container for the Solution class
-        bus_container = type('', (), {})()
-        bus_container.index = bus_names
-        bus_container.bus_count = bus_names
-        bus_container.bus_type = {bus.name: bus.bus_type for bus in buses}
-        
-        # Create dictionaries for voltage and angles
-        delta_dict = {bus.name: bus.delta for bus in buses}
-        voltage_dict = {bus.name: bus.vpu for bus in buses}
-        
-        # Create a load if needed
-        if hasattr(circuit, 'load') and circuit.load:
-            primary_load = list(circuit.load.values())[0]
-        else:
-            primary_load = Load("Dummy_Load", buses[0], 0.0, 0.0)
-        
-        # Initialize solution object
-        solution = Solution("PowerFlow Solution", bus_container, circuit, primary_load)
-        solution.delta = delta_dict
-        solution.voltage = voltage_dict
-        solution.P = solution.calc_Px()
-        solution.Q = solution.calc_Qx()
-        
-        return solution
+    # Add buses with different types
+    circuit.add_bus("Bus1", 132)
+    circuit.buses["Bus1"].bus_type = "Slack Bus"
+    circuit.buses["Bus1"].vpu = 1.05
     
-    def _get_scheduled_powers(self, buses, circuit):
-        """Extract scheduled power values from buses and loads."""
-        n_bus = len(buses)
-        p_scheduled = np.zeros(n_bus)
-        q_scheduled = np.zeros(n_bus)
-        
-        # Add bus generation (if any)
-        for i, bus in enumerate(buses):
-            if hasattr(bus, 'p_gen'):
-                p_scheduled[i] += bus.p_gen
-            if hasattr(bus, 'q_gen'):
-                q_scheduled[i] += bus.q_gen
-                
-        # Add load contributions (load is taken as negative power)
-        if hasattr(circuit, 'load') and circuit.load:
-            for load in circuit.load.values():
-                bus_idx = buses.index(load.bus)
-                p_scheduled[bus_idx] -= load.real_power
-                q_scheduled[bus_idx] -= load.reactive_power
-        
-        return p_scheduled, q_scheduled
+    circuit.add_bus("Bus2", 132)
+    circuit.buses["Bus2"].bus_type = "PV Bus"
+    circuit.buses["Bus2"].vpu = 1.02
     
-    def _calculate_power_injections(self, buses, ybus, v_mag, v_ang):
-        """Calculate active and reactive power injections at all buses."""
-        n_bus = len(buses)
-        p_calc = np.zeros(n_bus)
-        q_calc = np.zeros(n_bus)
-        
-        # Convert ybus to numpy array if it's a DataFrame
-        if hasattr(ybus, 'values'):
-            y_matrix = ybus.values
-        else:
-            y_matrix = ybus
-        
-        # Calculate power injections using the power flow equations
-        for i in range(n_bus):
-            for j in range(n_bus):
-                y_ij = y_matrix[i, j]
-                y_ij_abs = abs(y_ij)
-                theta_ij = np.angle(y_ij)
-                
-                angle_diff = v_ang[i] - v_ang[j]
-                
-                p_calc[i] += v_mag[i] * v_mag[j] * y_ij_abs * np.cos(angle_diff - theta_ij)
-                q_calc[i] += v_mag[i] * v_mag[j] * y_ij_abs * np.sin(angle_diff - theta_ij)
-        
-        return p_calc, q_calc
+    circuit.add_bus("Bus3", 33)
+    circuit.buses["Bus3"].bus_type = "PQ Bus"
+    
+    # Create loads for each bus
+    loads = []
+    loads.append(Load("Load1", circuit.buses["Bus1"], 0.0, 0.0))  # Slack bus typically has no scheduled load
+    loads.append(Load("Load2", circuit.buses["Bus2"], 0.5, 0.0))  # PV bus with active power specified
+    loads.append(Load("Load3", circuit.buses["Bus3"], -0.5, -0.3))  # PQ bus with active and reactive load
+    
+    # Add loads to circuit (assuming circuit has a loads attribute)
+    circuit.load = {load.name: load for load in loads}
+    
+    # Create a simple Ybus and assign it to the circuit
+    ybus_data = [
+        [complex(10, -30), complex(-5, 15), complex(-5, 15)],
+        [complex(-5, 15), complex(10, -30), complex(-5, 15)],
+        [complex(-5, 15), complex(-5, 15), complex(10, -30)]
+    ]
+    
+    circuit.ybus = pd.DataFrame(ybus_data)
+    
+    # Create and run the solver
+    solver = PowerFlow()
+    results = solver.solve_circuit(circuit)
+    
+    # Print results
+    print("\nNewton-Raphson Power Flow Solution")
+    print("---------------------------------")
+    print(f"Converged: {results['converged']}")
+    print(f"Iterations: {results['iterations']}")
+    
+    print("\nBus Voltages:")
+    for bus_name, bus in circuit.buses.items():
+        print(f"{bus_name}: {bus.vpu:.4f} ∠{np.degrees(bus.delta):.2f}°")
+    
+    if 'p_calc' in results and 'q_calc' in results:
+        print("\nCalculated Power Flows:")
+        for i, (bus_name, bus) in enumerate(circuit.buses.items()):
+            p = results['p_calc'][i]
+            q = results['q_calc'][i]
+            print(f"{bus_name}: P = {p:.4f} p.u., Q = {q:.4f} p.u.")

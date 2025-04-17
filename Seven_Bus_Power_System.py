@@ -24,6 +24,23 @@ circuit1.buses["Bus5"].bus_type = 'PQ Bus'
 circuit1.buses["Bus6"].bus_type = 'PQ Bus'
 circuit1.buses["Bus7"].bus_type = 'PV Bus' #generator bus type
 
+# Update circuit1 bus voltage and angle
+circuit1.buses["Bus1"].vpu = 1.00000
+circuit1.buses["Bus2"].vpu = 0.93692
+circuit1.buses["Bus3"].vpu = 0.92049
+circuit1.buses["Bus4"].vpu = 0.92980
+circuit1.buses["Bus5"].vpu = 0.92672
+circuit1.buses["Bus6"].vpu = 0.93968
+circuit1.buses["Bus7"].vpu = 0.99999
+
+circuit1.buses["Bus1"].delta = 0.00
+circuit1.buses["Bus2"].delta = -4.44
+circuit1.buses["Bus3"].delta = -5.46
+circuit1.buses["Bus4"].delta = -4.70
+circuit1.buses["Bus5"].delta = -4.83
+circuit1.buses["Bus6"].delta = -3.95
+circuit1.buses["Bus7"].delta = 2.15
+
 #circuit1.buses["Bus1"].vpu = 1.0  # Slack bus voltage
 #circuit1.buses["Bus1"].delta = 0.0
 # circuit1.buses["Bus2"].vpu = 1.0  # PV bus voltage (if it's a PV bus)

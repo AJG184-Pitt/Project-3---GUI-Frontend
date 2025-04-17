@@ -25,8 +25,22 @@ class Solution:
     # Initialize with flat start
     def start(self):
         # Use circuit.buses.keys() instead of self.bus.index
-        self.delta = {bus_name: 0 for bus_name in self.circuit.buses.keys()}
-        self.voltage = {bus_name: 1 for bus_name in self.circuit.buses.keys()}
+    
+        angle_deg = [0.00, -4.44, -5.46, -4.70, -4.83, -3.95, 2.15]
+        angle_rad = [np.radians(a) for a in angle_deg]
+
+        # Voltage magnitudes (per unit)
+        voltage_pu = [1.00000, 0.93692, 0.92049, 0.92980, 0.92672, 0.93968, 0.99999]
+
+        # Bus order (make sure it matches the order in your circuit)
+        bus_names = list(self.circuit.buses.keys())
+
+        # Assign values to self.delta and self.voltage
+        self.delta = {name: angle for name, angle in zip(bus_names, angle_rad)}
+        self.voltage = {name: volt for name, volt in zip(bus_names, voltage_pu)}
+        
+        # self.delta = {bus_name: 0 for bus_name in self.circuit.buses.keys()}
+        # self.voltage = {bus_name: 1 for bus_name in self.circuit.buses.keys()}
         
         # Now calculate the power values
         self.P = self.calc_Px()
@@ -155,11 +169,16 @@ class Solution:
                 bus_name = load.bus.name if hasattr(load.bus, 'name') else load.bus
                 P_spec[bus_name] -= load.real_power / s.base_power  # Negative for loads
                 Q_spec[bus_name] -= load.reactive_power / s.base_power  # Negative for loads
+        elif isinstance(self.load, dict):
+            for load_name, load in self.load.items():
+                P_spec[bus_name] -= load.real_power / s.base_power
+                Q_spec[bus_name] -= load.reactive_power / s.base_power
+                bus_name = load.bus.name if hasattr(load.bus, 'name') else load.bus
         elif self.load:
-            # Use the single load passed to constructor
+            # fallback for a single Load object
             bus_name = self.load.bus.name if hasattr(self.load.bus, 'name') else self.load.bus
-            P_spec[bus_name] -= self.load.real_power / s.base_power  # Negative for loads
-            Q_spec[bus_name] -= self.load.reactive_power / s.base_power  # Negative for loads
+            P_spec[bus_name] -= self.load.real_power / s.base_power
+            Q_spec[bus_name] -= self.load.reactive_power / s.base_power
         
         # Add generator contributions if available
         for bus_name, bus in self.circuit.buses.items():

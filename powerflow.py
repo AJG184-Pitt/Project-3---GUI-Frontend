@@ -19,7 +19,7 @@ class PowerFlow:
     using the Solution class for power mismatches and the Jacobian class.
     """
     
-    def __init__(self):
+    def __init__(self, circuit):
         """Initialize the PowerFlow solver."""
         self.jacobian = Jacobian(circuit)
     

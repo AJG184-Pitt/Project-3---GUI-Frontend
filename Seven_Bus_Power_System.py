@@ -74,7 +74,8 @@ jacobian = Jacobian(circuit1)
 
 J = jacobian.calc_jacobian(circuit1.buses.values(), circuit1.ybus, angles, voltages)
 print("\nJacobian Matrix:")
-print(np.round(J,2))
+# print(np.round(J,2))
+print(J)
 
 '''
 #powerflow = PowerFlow()

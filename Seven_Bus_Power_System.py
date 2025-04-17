@@ -4,6 +4,7 @@ import numpy as np
 from powerflow import PowerFlow
 from solution import Solution
 from load import Load
+from solution_symmetric import Solution_Faults
 
 circuit1 = Circuit("Test Circuit")
 
@@ -157,3 +158,8 @@ else:
     print("No iterations performed")
 
 print("========================================")
+
+faults = Solution_Faults(circuit1)
+# faults.calculate_fault_currents()
+
+print(f"\nSolution Faults {faults.calculate_fault_currents()}")

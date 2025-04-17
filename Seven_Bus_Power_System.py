@@ -113,3 +113,29 @@ print(f"\nSolution y: {solution.y}")
 print(f"\nSolution Px: {solution.calc_Px()}")
 print(f"\nSolution Qx: {solution.calc_Qx()}")
 print(f"\nSolution Mismatch: {solution.calc_mismatch()}")
+
+powerflow = PowerFlow(circuit1)
+power_results = powerflow.solve_circuit(circuit1)
+
+print("\n===== POWER FLOW RESULTS =====")
+print(f"Converged: {power_results['converged']}")
+print(f"Iterations: {power_results['iterations']}")
+print(f"Final Maximum Mismatch: {power_results['final_mismatch']:.6f}")
+
+print("\n--- Bus Voltages ---")
+for i, (mag, ang) in enumerate(zip(power_results['v_mag'], power_results['v_ang'])):
+    print(f"Bus {i+1}: {mag:.4f} ∠{np.degrees(ang):.2f}°")
+
+if 'p_calc' in power_results and 'q_calc' in power_results:
+    print("\n--- Power Injections ---")
+    for i, (p, q) in enumerate(zip(power_results['p_calc'], power_results['q_calc'])):
+        print(f"Bus {i+1}: P = {p:.4f} p.u., Q = {q:.4f} p.u.")
+
+print("\n--- Convergence History ---")
+if len(power_results['mismatch_history']) > 0:
+    for i, mismatch in enumerate(power_results['mismatch_history']):
+        print(f"Iteration {i+1}: Maximum Mismatch = {mismatch:.6f}")
+else:
+    print("No iterations performed")
+
+print("========================================")

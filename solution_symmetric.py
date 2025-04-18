@@ -40,7 +40,7 @@ class Solution_Faults:
             fault_currents[n] = Ifn_prime
             
             # Calculate bus voltage after fault for the nth bus
-            En = 1 - (self.zbus[n, n] / Znn) * self.voltage_pu
+            En = (1 - (self.zbus[n, n] / Znn)) * self.voltage_pu
             bus_voltages_after_fault[n] = En
 
         return fault_currents, bus_voltages_after_fault

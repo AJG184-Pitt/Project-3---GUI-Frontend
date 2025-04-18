@@ -4,6 +4,7 @@ import numpy as np
 from powerflow import PowerFlow
 from solution import Solution
 from load import Load
+from solution_symmetric import Solution_Faults
 
 circuit1 = Circuit("Test Circuit")
 
@@ -23,6 +24,23 @@ circuit1.buses["Bus4"].bus_type = 'PQ Bus'
 circuit1.buses["Bus5"].bus_type = 'PQ Bus'
 circuit1.buses["Bus6"].bus_type = 'PQ Bus'
 circuit1.buses["Bus7"].bus_type = 'PV Bus' #generator bus type
+
+# Update circuit1 bus voltage and angle
+circuit1.buses["Bus1"].vpu = 1.00000
+circuit1.buses["Bus2"].vpu = 0.93692
+circuit1.buses["Bus3"].vpu = 0.92049
+circuit1.buses["Bus4"].vpu = 0.92980
+circuit1.buses["Bus5"].vpu = 0.92672
+circuit1.buses["Bus6"].vpu = 0.93968
+circuit1.buses["Bus7"].vpu = 0.99999
+
+circuit1.buses["Bus1"].delta = 0.00
+circuit1.buses["Bus2"].delta = -4.44
+circuit1.buses["Bus3"].delta = -5.46
+circuit1.buses["Bus4"].delta = -4.70
+circuit1.buses["Bus5"].delta = -4.83
+circuit1.buses["Bus6"].delta = -3.95
+circuit1.buses["Bus7"].delta = 2.15
 
 #circuit1.buses["Bus1"].vpu = 1.0  # Slack bus voltage
 #circuit1.buses["Bus1"].delta = 0.0
@@ -74,7 +92,8 @@ jacobian = Jacobian(circuit1)
 
 J = jacobian.calc_jacobian(circuit1.buses.values(), circuit1.ybus, angles, voltages)
 print("\nJacobian Matrix:")
-print(np.round(J,2))
+# print(np.round(J,2))
+print(J)
 
 '''
 #powerflow = PowerFlow()
@@ -114,6 +133,33 @@ print(f"\nSolution Px: {solution.calc_Px()}")
 print(f"\nSolution Qx: {solution.calc_Qx()}")
 print(f"\nSolution Mismatch: {solution.calc_mismatch()}")
 
+powerflow = PowerFlow(circuit1)
+power_results = powerflow.solve_circuit(circuit1)
 
+print("\n===== POWER FLOW RESULTS =====")
+print(f"Converged: {power_results['converged']}")
+print(f"Iterations: {power_results['iterations']}")
+print(f"Final Maximum Mismatch: {power_results['final_mismatch']:.6f}")
 
+print("\n--- Bus Voltages ---")
+for i, (mag, ang) in enumerate(zip(power_results['v_mag'], power_results['v_ang'])):
+    print(f"Bus {i+1}: {mag:.4f} ∠{np.degrees(ang):.2f}°")
 
+if 'p_calc' in power_results and 'q_calc' in power_results:
+    print("\n--- Power Injections ---")
+    for i, (p, q) in enumerate(zip(power_results['p_calc'], power_results['q_calc'])):
+        print(f"Bus {i+1}: P = {p:.4f} p.u., Q = {q:.4f} p.u.")
+
+print("\n--- Convergence History ---")
+if len(power_results['mismatch_history']) > 0:
+    for i, mismatch in enumerate(power_results['mismatch_history']):
+        print(f"Iteration {i+1}: Maximum Mismatch = {mismatch:.6f}")
+else:
+    print("No iterations performed")
+
+print("========================================")
+
+faults = Solution_Faults(circuit1)
+# faults.calculate_fault_currents()
+
+print(f"\nSolution Faults {faults.calculate_fault_currents()}")

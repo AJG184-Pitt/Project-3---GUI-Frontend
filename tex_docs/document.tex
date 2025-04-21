@@ -18,13 +18,13 @@
 	\section{Classes}
 	
 	\subsection{Bus}
-	This class inserts the busses needed to build circuit. The class is designed such that any amount of busses can be added to the circuit and will be properly classified into PV, PQ, or slack busses
+	This class inserts the buses needed to build circuit. The class is designed such that any amount of buses can be added to the circuit and will be properly classified into PV, PQ, or slack buses
 	
 	\subsection{Transformer}
-	If two busses are set to differing voltage values this class inserts and calculates the necessary transformer equations to change the voltage of the system from bus A to the designated voltage level of bus B
+	If two buses are set to differing voltage values this class inserts and calculates the necessary transformer equations to change the voltage of the system from bus A to the designated voltage level of bus B
 	
 	\subsection{Transmission Line}
-	When two busses of the same value need to be connected this class calculates the necessary electrical properties to insert a transmission line between the two busses.
+	When two buses of the same value need to be connected this class calculates the necessary electrical properties to insert a transmission line between the two buses.
 	
 	\subsection{Conductor}
 	Since the ACSR conductor type is used this class collects all the parameters about the conductors.
@@ -42,8 +42,6 @@
 	This class has all the input data about the circuit that is built and analyzed.
 	
 	\section{Equations Used for Power Calculations}
-	
-	\section{Example Problem with Solution}
 	\noindent
 	Transformer Impedance: $Z_{pu} = Z_\% / 100 * S_{base} / S_{transformer} * \angle{\theta}$
 	
@@ -52,6 +50,10 @@
 	
 	\noindent
 	Transformer Y-Bus Matrix: [ $Y_{Bus}$ ] = [$Y_{11}$ $-Y_{12}$]
-
-	\hspace{141pt}[$-Y_{21}$ $Y_{22}$]	
+	
+	\noindent
+	\phantom{Transformer Y-Bus Matrix: [ $Y_{Bus}$ ] = }[$-Y_{21}$ $Y_{22}$]
+	
+	\section{Example Problem with Solution}
+	
 \end{document}

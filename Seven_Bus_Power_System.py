@@ -168,4 +168,5 @@ print("========================================")
 faults = Solution_Faults(circuit1)
 # faults.calculate_fault_currents()
 
-print(f"\nSolution Faults {faults.calculate_fault_currents()}")
+print(f"\nSolution Faults Current: {faults.calculate_fault_currents_2(circuit1.buses["Bus4"])[0]}")
+print(f"\nSolution Faults Bus Voltages: {faults.calculate_fault_currents_2(circuit1.buses["Bus4"])[1]}")

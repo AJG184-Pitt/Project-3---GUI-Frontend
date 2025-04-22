@@ -4,12 +4,13 @@
 \date{\today}
 
 \usepackage{times}
+\usepackage{tcolorbox}
 
 \begin{document}
 	\maketitle
 	
 	\section{Overview}
-	This project aims to simulate an advanced power system that involves transmission lines, transformers, buses, and other components of a power grid system.
+	This project focuses on developing a foundational power systems modeling tool in Python. The code implements core classes representing essential power system components – buses, generators, conductors, geometries, and a central Circuit class to tie them together. The Circuit class allows for the definition of a network, calculation of key parameters like equivalent distance between conductors, and ultimately, the creation of the network admittance matrix (Y-bus) – a crucial step for load flow analysis and power system studies. The code provides a modular structure, enabling future expansion to include additional components, more complex modeling features, and potentially integration with established power system analysis tools. The aim is to provide a flexible and customizable platform for exploring power system concepts and performing basic analysis.
 	
 	\section{Class Diagram}
 	
@@ -17,33 +18,52 @@
 	
 	\section{Classes}
 	
-	\subsection{Bus}
-	This class inserts the busses needed to build circuit. The class is designed such that any amount of busses can be added to the circuit and will be properly classified into PV, PQ, or slack busses
-	
-	\subsection{Transformer}
-	If two busses are set to differing voltage values this class inserts and calculates the necessary transformer equations to change the voltage of the system from bus A to the designated voltage level of bus B
-	
-	\subsection{Transmission Line}
-	When two busses of the same value need to be connected this class calculates the necessary electrical properties to insert a transmission line between the two busses.
-	
-	\subsection{Conductor}
-	Since the ACSR conductor type is used this class collects all the parameters about the conductors.
-	
 	\subsection{Bundle}
-	Since this circuit will use multiple conductors per phase in the transmission line this class is needed to calculate the parameters per phase
+	The Bundle class models a collection of conductors used in this simulation and calculates effective radii for resistance and inductance computations. This class is essential for modeling transmission lines, as it helps accurately compute effective radii for conductors arranged in bundles, affecting overall line behavior in analyses.
 	
-	\subsection{Geometry}
-	This class calculates how the location of the transmission lines affect certain parameters.
+	\subsection{Bus}
+	This Bus class is designed to model various types of buses within the power system, such as Slack, PV, and PQ buses. Each Bus instance is initialized with a name and base voltage (base\_kv). The class maintains a count of all Bus instances created using the class-level variable bus\_count. Key attributes include the bus type, voltage per unit (vpu), phase angle (delta), and power values (real\_power and reactive\_power). This class serves as a foundational component for simulating and analyzing power systems, enabling tracking of essential electrical characteristics for each bus.
 	
-	\subsection{Circuit}
+	\subsection{\colorbox{yellow}{Circuit}}
 	This class acts as the main source of controlling the flow of power throughout the system. It calls other methods and utilizes them to create objects and insert values for power flow analysis.
 	
-	\subsection{Seven Bus Power System}
+	\subsection{Conductor}
+	The Conductor class is designed to model electrical conductors by initializing them with key properties such as name, diameter (diam), geometric mean radius (GMR), resistance, and ampacity. Upon instantiation, these parameters are assigned to instance variables, and the radius is calculated by converting the diameter from a given unit to inches using a divisor of 24.
+	
+	\subsection{Generator}
+	The Generator class models a generator component within this  power system. Each generator is initialized with a name for identification, an associated bus reference (Bus), a target voltage level (voltage\_setpoint), and a target power output in megawatts (mw\_setpoint).
+	
+	\subsection{Geometry}
+	The Geometry class models a geometric figure defined by three points (A, B, and C) with their respective coordinates. Upon initialization, it calculates an attribute Deq, which is the average distance between each pair of these points. This is achieved using the distance formula to compute the lengths of sides AB, BC, and AC, then averaging them. The class is useful for scenarios requiring a measure of the average side length of a triangle formed by three points.
+	
+	\subsection{Jacobian}
+	\dots
+	
+	\subsection{Load}
+	\dots
+	
+	\subsection{Powerflow}
+	\dots
+	
+	\subsection{Settings}
+	\dots
+	
+	\subsection{\colorbox{yellow}{Seven Bus Power System}}
 	This class has all the input data about the circuit that is built and analyzed.
 	
-	\section{Equations Used for Power Calculations}
+	\subsection{Solution}
+	\dots
+
+	\subsection{Solution\_Symmetric}
+	\dots	
 	
-	\section{Example Problem with Solution}
+	\subsection{Transformer}
+	The Transformer class models transformers in a power system, connecting two buses and calculating their electrical characteristics like impedance and admittance. It's essential for simulating power flow and analyzing the system's behavior in this simulation.
+	
+	\subsection{Transmission Line}
+	The TransmissionLine class encapsulates the electrical characteristics of a power transmission line. It initializes with necessary components such as buses, conductors, bundles, geometry, and length. The class computes series impedance (rpu, xpu) and shunt admittance (bpu) using given formulas. These values are then used to construct an admittance matrix (yprim), essential for power flow analysis. This model allows detailed simulation of how electrical power is transmitted between two points in a power system.
+	
+	\section{Equations Used for Power Calculations}
 	\noindent
 	Transformer Impedance: $Z_{pu} = Z_\% / 100 * S_{base} / S_{transformer} * \angle{\theta}$
 	
@@ -52,6 +72,10 @@
 	
 	\noindent
 	Transformer Y-Bus Matrix: [ $Y_{Bus}$ ] = [$Y_{11}$ $-Y_{12}$]
-
-	\hspace{141pt}[$-Y_{21}$ $Y_{22}$]	
+	
+	\noindent
+	\phantom{Transformer Y-Bus Matrix: [ $Y_{Bus}$ ] = }[$-Y_{21}$ $Y_{22}$]
+	
+	\section{Example Problem with Solution}
+	
 \end{document}

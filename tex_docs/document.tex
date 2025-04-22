@@ -18,29 +18,50 @@
 	
 	\section{Classes}
 	
+	\subsection{Bundle}
+	The Bundle class models a collection of conductors used in this simulation and calculates effective radii for resistance and inductance computations. This class is essential for modeling transmission lines, as it helps accurately compute effective radii for conductors arranged in bundles, affecting overall line behavior in analyses.
+	
 	\subsection{Bus}
 	This Bus class is designed to model various types of buses within the power system, such as Slack, PV, and PQ buses. Each Bus instance is initialized with a name and base voltage (base\_kv). The class maintains a count of all Bus instances created using the class-level variable bus\_count. Key attributes include the bus type, voltage per unit (vpu), phase angle (delta), and power values (real\_power and reactive\_power). This class serves as a foundational component for simulating and analyzing power systems, enabling tracking of essential electrical characteristics for each bus.
+	
+	\subsection{\colorbox{yellow}{Circuit}}
+	This class acts as the main source of controlling the flow of power throughout the system. It calls other methods and utilizes them to create objects and insert values for power flow analysis.
+	
+	\subsection{Conductor}
+	The Conductor class is designed to model electrical conductors by initializing them with key properties such as name, diameter (diam), geometric mean radius (GMR), resistance, and ampacity. Upon instantiation, these parameters are assigned to instance variables, and the radius is calculated by converting the diameter from a given unit to inches using a divisor of 24.
+	
+	\subsection{Generator}
+	The Generator class models a generator component within this  power system. Each generator is initialized with a name for identification, an associated bus reference (Bus), a target voltage level (voltage\_setpoint), and a target power output in megawatts (mw\_setpoint).
+	
+	\subsection{Geometry}
+	The Geometry class models a geometric figure defined by three points (A, B, and C) with their respective coordinates. Upon initialization, it calculates an attribute Deq, which is the average distance between each pair of these points. This is achieved using the distance formula to compute the lengths of sides AB, BC, and AC, then averaging them. The class is useful for scenarios requiring a measure of the average side length of a triangle formed by three points.
+	
+	\subsection{Jacobian}
+	\dots
+	
+	\subsection{Load}
+	\dots
+	
+	\subsection{Powerflow}
+	\dots
+	
+	\subsection{Settings}
+	\dots
+	
+	\subsection{\colorbox{yellow}{Seven Bus Power System}}
+	This class has all the input data about the circuit that is built and analyzed.
+	
+	\subsection{Solution}
+	\dots
+
+	\subsection{Solution\_Symmetric}
+	\dots	
 	
 	\subsection{Transformer}
 	The Transformer class models transformers in a power system, connecting two buses and calculating their electrical characteristics like impedance and admittance. It's essential for simulating power flow and analyzing the system's behavior in this simulation.
 	
 	\subsection{Transmission Line}
 	The TransmissionLine class encapsulates the electrical characteristics of a power transmission line. It initializes with necessary components such as buses, conductors, bundles, geometry, and length. The class computes series impedance (rpu, xpu) and shunt admittance (bpu) using given formulas. These values are then used to construct an admittance matrix (yprim), essential for power flow analysis. This model allows detailed simulation of how electrical power is transmitted between two points in a power system.
-	
-	\subsection{Conductor}
-	The Conductor class is designed to model electrical conductors by initializing them with key properties such as name, diameter (diam), geometric mean radius (GMR), resistance, and ampacity. Upon instantiation, these parameters are assigned to instance variables, and the radius is calculated by converting the diameter from a given unit to inches using a divisor of 24.
-	
-	\subsection{Bundle}
-	The Bundle class models a collection of conductors used in this simulation and calculates effective radii for resistance and inductance computations. This class is essential for modeling transmission lines, as it helps accurately compute effective radii for conductors arranged in bundles, affecting overall line behavior in analyses.
-	
-	\subsection{Geometry}
-	The Geometry class models a geometric figure defined by three points (A, B, and C) with their respective coordinates. Upon initialization, it calculates an attribute Deq, which is the average distance between each pair of these points. This is achieved using the distance formula to compute the lengths of sides AB, BC, and AC, then averaging them. The class is useful for scenarios requiring a measure of the average side length of a triangle formed by three points.
-	
-	\subsection{Circuit}
-	This class acts as the main source of controlling the flow of power throughout the system. It calls other methods and utilizes them to create objects and insert values for power flow analysis.
-	
-	\subsection{Seven Bus Power System}
-	This class has all the input data about the circuit that is built and analyzed.
 	
 	\section{Equations Used for Power Calculations}
 	\noindent

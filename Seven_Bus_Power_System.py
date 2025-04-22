@@ -86,7 +86,7 @@ np.set_printoptions(threshold=np.inf, linewidth=np.inf)
 circuit1.calc_ybus()
 circuit1.print_ybus()
 
-angles = np.array([bus.delta for bus in circuit1.buses.values()])
+angles = np.radians([bus.delta for bus in circuit1.buses.values()])
 voltages = np.array([bus.vpu for bus in circuit1.buses.values()])
 jacobian = Jacobian(circuit1)
 
@@ -136,14 +136,20 @@ print(f"\nSolution Mismatch: {solution.calc_mismatch()}")
 powerflow = PowerFlow(circuit1)
 power_results = powerflow.solve_circuit(circuit1)
 
+
+# Display results
 print("\n===== POWER FLOW RESULTS =====")
 print(f"Converged: {power_results['converged']}")
 print(f"Iterations: {power_results['iterations']}")
 print(f"Final Maximum Mismatch: {power_results['final_mismatch']:.6f}")
 
-print("\n--- Bus Voltages ---")
-for i, (mag, ang) in enumerate(zip(power_results['v_mag'], power_results['v_ang'])):
-    print(f"Bus {i+1}: {mag:.4f} ∠{np.degrees(ang):.2f}°")
+print("\n--- Per Unit Voltages ---")
+for i, v in enumerate(power_results['v_mag']):
+    print(f"Bus {i+1}: {v:.5f}")
+
+print("\n--- Voltage Angles (Degrees) ---")
+for i, ang in enumerate(power_results['v_ang']):
+    print(f"Bus {i+1}: {np.degrees(ang):.2f}")
 
 if 'p_calc' in power_results and 'q_calc' in power_results:
     print("\n--- Power Injections ---")

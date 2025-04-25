@@ -26,21 +26,53 @@ class Solution_Faults:
         # Calculate Zbus (inverse of Ybus)
         self.zbus = np.linalg.inv(self.ybus)
 
-    def calculate_fault_currents(self):
+    def calculate_fault_currents(self, bus: Bus):
         num_buses = len(self.circuit.buses)
-        fault_currents = np.zeros(num_buses, dtype=complex)
-        bus_voltages_after_fault = np.zeros(num_buses, dtype=complex)
+        # fault_currents = np.zeros(num_buses, dtype=complex)
+        # bus_voltages_after_fault = np.zeros(num_buses, dtype=complex)
+        fault_currents = 0
+        bus_voltages_after_fault = 0
+
+        Znn = self.zbus[bus.index, bus.index]
+
+        # Calculate fault current at the nth bus (which is now the current bus)
+        Ifn_prime = self.voltage_pu / Znn
+        fault_currents[bus.index] = Ifn_prime
+        
+        # Calculate bus voltage after fault for the nth bus
+        # bus_voltages_after_fault[n] = En
 
         for bus in self.circuit.buses.values():
-            n = bus.index
-            Znn = self.zbus[n, n]
+            k = bus.index
+            Zkk = self.zbus[k, k]
             
             # Calculate fault current at the nth bus
-            Ifn_prime = self.voltage_pu / Znn
-            fault_currents[n] = Ifn_prime
+            # Ifk_prime = self.voltage_pu / Zkk
+            # fault_currents[k] = Ifk_prime
             
             # Calculate bus voltage after fault for the nth bus
-            En = (1 - (self.zbus[n, n] / Znn)) * self.voltage_pu
-            bus_voltages_after_fault[n] = En
+            Ek = (1 - (self.zbus[k, k] / Zkk)) * self.voltage_pu
+            bus_voltages_after_fault[k] = Ek
 
         return fault_currents, bus_voltages_after_fault
+
+    def calculate_fault_currents_2(self, bus: Bus):
+        """
+        Will overwrite calculate_fault_currents if correct
+        """
+        
+        # Get the impedance at the fault bus (Znn)
+        Znn = self.zbus[bus.index, bus.index]
+        
+        # Calculate fault current at the selected bus
+        fault_current = self.voltage_pu / Znn
+        
+        # Calculate bus voltages after fault for all buses
+        num_buses = len(self.circuit.buses)
+        bus_voltages_after_fault = np.zeros(num_buses, dtype=complex)
+        
+        for k in range(num_buses):
+            # Calculate bus voltage after fault for each bus
+            bus_voltages_after_fault[k] = (1 - (self.zbus[k, bus.index] / Znn)) * self.voltage_pu
+        
+        return fault_current, bus_voltages_after_fault

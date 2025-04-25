@@ -113,6 +113,18 @@ class TransmissionLine {
     +calc_matrix()
 }
 
+class Solution {
+
+}
+
+class Solution_Symmetric {
+
+}
+
+class Jacobian {
+    
+}
+
 Circuit --> Bundle
 Circuit --> Bus
 Circuit --> Conductor

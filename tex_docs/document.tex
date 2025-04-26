@@ -87,15 +87,36 @@
 	\\
 	4 conductors: \\
 	$DSC = 1.091 * (r * s^4)^{1/4}$ \\
-	$DSL = 1.091 * (GMR * s^4)^{1/4}$
+	$DSL = 1.091 * (GMR * s^4)^{1/4}$ \\
+	
+	\noindent
+	Where: \\
+	DSC is the equivalent diameter of a single circular conductor \\
+	DSL is the geometric mean radius of the bundle \\
+	r is the radius of individual conductors \\
+	s is the spacing between conductors 
 	
 	\subsection{Circuit}
-	Y-Prim = \\
-	Y-Bus = \\
+	Y-Bus[i,i] = sum of all self-admittances at bus i \\
+	Y-Bus[i,j] = -sum of mutual admittances between buses i and j \\
+	\noindent
+	$Z_{\text{transformer}} = \frac{\text{base\_voltage}^2}{\text{power\_rating}} * \frac{\text{impedance\_percent}}{100}$ \\
+	$G_{\text{line}} = \text{conductance per unit length} * \text{length}$ \\
+	$B_{\text{line}} = \text{susceptance per unit length} * \text{length}$ \\
+	$Z_{\text{line}} = R + jX$
 	
+	\subsection{Generator}
+	$Y_1 = 1/jX_1$ \\
+	$Y_2 = 1/jX_2$ \\
+	$Y_0 = 1/(jX_0 + 3Zg)$ \\
+	\noindent
+	Where: \\
+	Y represents admittance (per unit or Siemens) \\
+	X represents reactance (per unit or Ohms) \\
+	Zg represents ground resistance (Ohms) \\
+	j is the imaginary unit $(\sqrt{-1})$ 
 	
-	
-	
+	\subsection{title}
 	
 	\noindent
 	Transformer Impedance: $Z_{pu} = Z_\% / 100 * S_{\text{base}} / S_{\text{transformer}} * \angle{\theta}$

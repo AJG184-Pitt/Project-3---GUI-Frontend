@@ -78,8 +78,8 @@ circuit1.add_load("Load6", "Bus6", 0, 0)
 # circuit1.add_load("Load7", "Bus7", 0, 0)
 
 #adding the generators
-circuit1.add_generator("G1", "Bus1", 1.0 ,0.0)
-circuit1.add_generator("G7", "Bus7", 1.0, 200)
+circuit1.add_generator("G1", "Bus1", 1.0, 0.0, 0.12, 0.14, 0.05, 0)
+circuit1.add_generator("G7", "Bus7", 1.0, 200, 0.12, 0.14, 0.05, 0)
 
 np.set_printoptions(threshold=np.inf, linewidth=np.inf)
 
@@ -167,7 +167,11 @@ print("========================================")
 
 faults = Solution_Faults(circuit1)
 # faults.calculate_fault_currents()
-ifs = faults.calculate_fault_currents_2(circuit1.buses["Bus4"])
+ifs = faults.calculate_fault_currents_2(circuit1.buses["Bus1"])
+ifs_2 = faults.calculate_fault_currents_2(circuit1.buses["Bus7"])
 
 print(f"\nSolution Faults Current: {ifs[0]}")
 print(f"\nSolution Faults Bus Voltages: {ifs[1]}")
+
+print(f"\nSolution Faults Current: {ifs_2[0]}")
+print(f"\nSolution Faults Bus Voltages: {ifs_2[1]}")

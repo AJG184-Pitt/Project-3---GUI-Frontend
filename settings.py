@@ -1,6 +1,6 @@
 class Settings:
 
-    def __init__(self, ):
+    def __init__(self):
         self.frequency = 60
         self.base_power = 100
 

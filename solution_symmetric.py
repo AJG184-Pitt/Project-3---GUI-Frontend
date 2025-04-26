@@ -4,12 +4,14 @@ from settings import s
 from load import Load
 import numpy as np
 import pandas as pd
+from generator import Generator
 
 class Solution_Faults:
 
-    def __init__(self, circuit):
+    def __init__(self, circuit: Circuit):
         self.circuit = circuit
         self.voltage_pu = 1.0  # Pre-fault voltage in per-unit
+        generators = self.circuit.generators
         
         # Check if circuit has Ybus calculated
         if self.circuit.ybus is None:
@@ -18,6 +20,13 @@ class Solution_Faults:
         # Convert pandas DataFrame to numpy array for calculations
         num_buses = len(self.circuit.buses)
         self.ybus = np.zeros((num_buses, num_buses), dtype=complex)
+
+        # ** Do this **
+        # y_bus[1,1] = ybus[1,1] + generator.y1
+        # y_bus[7,7] = ybus[7,7] + generator.y1
+
+        self.ybus[0,0] = self.ybus[0,0] + generators["G1"].y_bus_admittance
+        self.ybus[6,6] = self.ybus[6,6] + generators["G7"].y_bus_admittance
         
         for i in range(num_buses):
             for j in range(num_buses):
@@ -56,7 +65,7 @@ class Solution_Faults:
 
     #     return fault_currents, bus_voltages_after_fault
 
-    def calculate_fault_currents(self, bus: Bus):
+    def calculate_fault_currents_2(self, bus: Bus):
         """
         Will overwrite calculate_fault_currents if correct
         """

@@ -5,6 +5,9 @@
 
 \usepackage{times}
 \usepackage{tcolorbox}
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage{amsmath}
 
 \begin{document}
 	\maketitle
@@ -14,7 +17,11 @@
 	
 	\section{Class Diagram}
 	
-	\textit{insert class diagram}
+	\begin{figure}[H]
+		\centering
+		\includegraphics[scale=0.25]{../out/circuit/circuit.png}	
+		\caption{Class Diagram for Project}
+	\end{figure}
 	
 	\section{Classes}
 	
@@ -52,7 +59,7 @@
 	This Seven Bus Power System illustrates the development and solution of a power flow study on a typical electrical power system. It outlines the creation of a network model, including bus data, line data, and load data, in a Python setting. The code calculates the Jacobian matrix, a critical component of the power flow equations' solution, and utilizes a Newton-Raphson method to determine bus voltages and power injections. Additionally, the Seven Bus incorporates fault analysis capability, calculating fault currents and determining bus voltages under fault conditions. The code forms a foundation for power system behavior simulation, network stability verification, and contingency analysis, ultimately demonstrating an integrated approach to power system modeling and analysis.
 	
 	\subsection{Solution}
-	\dots
+	This Solution class implements a Newton-Raphson power flow solver for power system network analysis. It solves bus voltages by iterative minimization of the mismatch between calculated and specified power injections, utilizing an external `circuit` object to define network data and topology. The solver accommodates various bus types (Slack, PV, PQ) and features base MVA scaling for normalized calculations. By converging to a solution, it provides valuable information on steady-state operation, including voltage profiles and power flows, and is therefore a key building block for power system analysis.
 
 	\subsection{Solution Symmetric}
 	\dots	
@@ -65,13 +72,13 @@
 	
 	\section{Equations Used for Power Calculations}
 	\noindent
-	Transformer Impedance: $Z_{pu} = Z_\% / 100 * S_{base} / S_{transformer} * \angle{\theta}$
+	Transformer Impedance: $Z_{pu} = Z_\% / 100 * S_{\text{base}} / S_{\text{transformer}} * \angle{\theta}$
 	
 	\noindent
 	Transformer Admittance: $Y_{pu} = 1 / Z_{pu}$
 	
 	\noindent
-	Transformer Y-Bus Matrix: [ $Y_{Bus}$ ] = [$Y_{11}$ $-Y_{12}$]
+	Transformer Y-Bus Matrix: [ $Y_{\text{Bus}}$ ] = [$Y_{11}$ $-Y_{12}$]
 	
 	\noindent
 	\phantom{Transformer Y-Bus Matrix: [ $Y_{Bus}$ ] = }[$-Y_{21}$ $Y_{22}$]

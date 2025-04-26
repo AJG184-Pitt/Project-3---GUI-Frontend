@@ -13,13 +13,15 @@ class Generator:
         self.x2 = x2
         self.x0 = x0
         self.zg = zg
-        self.y1 = 1/(1j*x1)
+        self.y_bus_admittance = 1/(1j*x1)
         self.y2 = 1/(1j*x2)
         self.y0 = 1/(1j*x0+3*zg)
 
-
 if __name__ == '__main__':
-    bus = Bus("Bus 1", 20, "PV Bus")
-    generator = Generator("gen1", bus, 10, 20)
+    bus = Bus("Bus 1", 20)
+    generator = Generator("G1", "Bus1", 1.0, 0.0, 0.12, 0.14, 0.05, 0)
 
     print(generator.name, generator.bus, generator.voltage_setpoint, generator.mw_setpoint)
+    print(type(generator.y_bus_admittance))
+    print(type(generator.y2))
+    print(type(generator.y0))

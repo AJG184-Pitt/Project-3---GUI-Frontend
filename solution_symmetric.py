@@ -26,37 +26,37 @@ class Solution_Faults:
         # Calculate Zbus (inverse of Ybus)
         self.zbus = np.linalg.inv(self.ybus)
 
-    def calculate_fault_currents(self, bus: Bus):
-        num_buses = len(self.circuit.buses)
-        # fault_currents = np.zeros(num_buses, dtype=complex)
-        # bus_voltages_after_fault = np.zeros(num_buses, dtype=complex)
-        fault_currents = 0
-        bus_voltages_after_fault = 0
+    # def calculate_fault_currents(self, bus: Bus):
+    #     num_buses = len(self.circuit.buses)
+    #     # fault_currents = np.zeros(num_buses, dtype=complex)
+    #     # bus_voltages_after_fault = np.zeros(num_buses, dtype=complex)
+    #     fault_currents = 0
+    #     bus_voltages_after_fault = 0
 
-        Znn = self.zbus[bus.index, bus.index]
+    #     Znn = self.zbus[bus.index, bus.index]
 
-        # Calculate fault current at the nth bus (which is now the current bus)
-        Ifn_prime = self.voltage_pu / Znn
-        fault_currents[bus.index] = Ifn_prime
+    #     # Calculate fault current at the nth bus (which is now the current bus)
+    #     Ifn_prime = self.voltage_pu / Znn
+    #     fault_currents[bus.index] = Ifn_prime
         
-        # Calculate bus voltage after fault for the nth bus
-        # bus_voltages_after_fault[n] = En
+    #     # Calculate bus voltage after fault for the nth bus
+    #     # bus_voltages_after_fault[n] = En
 
-        for bus in self.circuit.buses.values():
-            k = bus.index
-            Zkk = self.zbus[k, k]
+    #     for bus in self.circuit.buses.values():
+    #         k = bus.index
+    #         Zkk = self.zbus[k, k]
             
-            # Calculate fault current at the nth bus
-            # Ifk_prime = self.voltage_pu / Zkk
-            # fault_currents[k] = Ifk_prime
+    #         # Calculate fault current at the nth bus
+    #         # Ifk_prime = self.voltage_pu / Zkk
+    #         # fault_currents[k] = Ifk_prime
             
-            # Calculate bus voltage after fault for the nth bus
-            Ek = (1 - (self.zbus[k, k] / Zkk)) * self.voltage_pu
-            bus_voltages_after_fault[k] = Ek
+    #         # Calculate bus voltage after fault for the nth bus
+    #         Ek = (1 - (self.zbus[k, k] / Zkk)) * self.voltage_pu
+    #         bus_voltages_after_fault[k] = Ek
 
-        return fault_currents, bus_voltages_after_fault
+    #     return fault_currents, bus_voltages_after_fault
 
-    def calculate_fault_currents_2(self, bus: Bus):
+    def calculate_fault_currents(self, bus: Bus):
         """
         Will overwrite calculate_fault_currents if correct
         """

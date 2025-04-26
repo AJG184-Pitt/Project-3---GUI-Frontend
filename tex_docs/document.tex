@@ -10,7 +10,7 @@
 	\maketitle
 	
 	\section{Overview}
-	This project focuses on developing a foundational power systems modeling tool in Python. The code implements core classes representing essential power system components – buses, generators, conductors, geometries, and a central Circuit class to tie them together. The Circuit class allows for the definition of a network, calculation of key parameters like equivalent distance between conductors, and ultimately, the creation of the network admittance matrix (Y-bus) – a crucial step for load flow analysis and power system studies. The code provides a modular structure, enabling future expansion to include additional components, more complex modeling features, and potentially integration with established power system analysis tools. The aim is to provide a flexible and customizable platform for exploring power system concepts and performing basic analysis.
+	This project involves writing a base power systems modeling package in Python. The code establishes basic classes for the main power system components – buses, generators, conductors, geometries, and an overarching Circuit class to link them. The Circuit class facilitates the establishment of a network, calculation of significant values like equivalent distance between conductors, and lastly, the construction of the network admittance matrix (Y-bus) – a critical step towards load flow analysis and power system study. The code offers a modular environment available for parallel development and, therefore, future expansion to include additional components, advanced modeling capabilities, and perhaps integration with other power system analysis software programs. The objective is to provide a flexible and customized platform for discussing power system concepts and performing basic analysis.
 	
 	\section{Class Diagram}
 	
@@ -24,8 +24,8 @@
 	\subsection{Bus}
 	This Bus class is designed to model various types of buses within the power system, such as Slack, PV, and PQ buses. Each Bus instance is initialized with a name and base voltage (base\_kv). The class maintains a count of all Bus instances created using the class-level variable bus\_count. Key attributes include the bus type, voltage per unit (vpu), phase angle (delta), and power values (real\_power and reactive\_power). This class serves as a foundational component for simulating and analyzing power systems, enabling tracking of essential electrical characteristics for each bus.
 	
-	\subsection{\colorbox{yellow}{Circuit}}
-	This class acts as the main source of controlling the flow of power throughout the system. It calls other methods and utilizes them to create objects and insert values for power flow analysis.
+	\subsection{Circuit}
+	The Circuit class serves as a foundational component for modeling this power systems. It encapsulates the various elements that comprise a circuit—including buses, conductors, bundles, transformers, transmission lines, loads, and generators—providing a structured framework for representing and analyzing power flow. The class allows users to define and connect these components, storing their properties and relationships.  A key functionality is the calc\_ybus method, which computes the network admittance matrix (Y-bus) which is crucial for power system analysis. This class forms the basis for more complex power system studies, enabling simulations of load flow, fault analysis, and system stability.
 	
 	\subsection{Conductor}
 	The Conductor class is designed to model electrical conductors by initializing them with key properties such as name, diameter (diam), geometric mean radius (GMR), resistance, and ampacity. Upon instantiation, these parameters are assigned to instance variables, and the radius is calculated by converting the diameter from a given unit to inches using a divisor of 24.
@@ -37,24 +37,24 @@
 	The Geometry class models a geometric figure defined by three points (A, B, and C) with their respective coordinates. Upon initialization, it calculates an attribute Deq, which is the average distance between each pair of these points. This is achieved using the distance formula to compute the lengths of sides AB, BC, and AC, then averaging them. The class is useful for scenarios requiring a measure of the average side length of a triangle formed by three points.
 	
 	\subsection{Jacobian}
-	\dots
+	The Jacobian class performs the Jacobian matrix calculation for power flow analysis in power systems. It provides methods for calculating each of the four submatrices (J1, J2, J3, J4) that constitute the total Jacobian. These include the real power (P) and reactive power (Q) sensitivities due to variations in voltage angles ($\delta$) and voltage magnitudes (V). The class crosses the network buses, computing these sensitivities from the admittance matrix (Ybus) and voltage angle and magnitude current estimates. The calculated Jacobian is a critical input to iterative power flow solvers, including the Newton-Raphson solution, to determine power system operating conditions. The functions within this class calculate efficiently the partial derivatives utilized for power flow convergence.
 	
 	\subsection{Load}
-	\dots
+	The Load class is an electrical load that is connected to some bus in the power system. Each load is described by a name, a pointer to the `Bus` that it is connected to, and its real\_power and reactive\_power demands (in Watts and VARs, respectively). This class simulates the action of power usage at a node in the network and is a key object to be utilized within power system simulation and analysis. It allows demand modeling of the electricity grid and must be done in order to conduct load flow, contingency, and other power calculations.
 	
 	\subsection{Powerflow}
-	\dots
+	The PowerFlow class computes the voltage magnitudes and angles of every bus in a power system circuit through the Newton-Raphson power flow algorithm. It is initialized with a circuit object that defines the network topology and parameters, and the power flow solution is determined iteratively. The solve\_circuit method performs the primary power flow calculation with a tolerance (tol) and maximum iterations (max\_iter). It employs a Jacobian object to calculate the Jacobian matrix and then proceeds to use it to update bus voltage angles and magnitudes iteratively until a converged solution is reached. The function returns a dictionary containing the convergence status, number of iterations, final mismatch, calculated voltage magnitudes and angles, calculated real and reactive power injections, and a history of the mismatch values during the iteration process, providing a complete overview of the power flow solution.
 	
 	\subsection{Settings}
-	\dots
+	The Settings class is a store of global parameters used throughout the power system analysis. It currently sets the system frequency (in Hertz) and base\_power (in MVA), base values used for per-unit calculation and conversion. This class provides simple modification and consistent application of these essential system parameters, with the benefit of code maintainability and the flexibility to represent different power system configurations. While presently constrained, it is designed to be extensible with more global settings as needed.
 	
-	\subsection{\colorbox{yellow}{Seven Bus Power System}}
-	This class has all the input data about the circuit that is built and analyzed.
+	\subsection{Seven Bus Power System}
+	This Seven Bus Power System illustrates the development and solution of a power flow study on a typical electrical power system. It outlines the creation of a network model, including bus data, line data, and load data, in a Python setting. The code calculates the Jacobian matrix, a critical component of the power flow equations' solution, and utilizes a Newton-Raphson method to determine bus voltages and power injections. Additionally, the Seven Bus incorporates fault analysis capability, calculating fault currents and determining bus voltages under fault conditions. The code forms a foundation for power system behavior simulation, network stability verification, and contingency analysis, ultimately demonstrating an integrated approach to power system modeling and analysis.
 	
 	\subsection{Solution}
 	\dots
 
-	\subsection{Solution\_Symmetric}
+	\subsection{Solution Symmetric}
 	\dots	
 	
 	\subsection{Transformer}

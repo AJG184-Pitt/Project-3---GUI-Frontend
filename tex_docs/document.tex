@@ -71,6 +71,32 @@
 	The TransmissionLine class encapsulates the electrical characteristics of a power transmission line. It initializes with necessary components such as buses, conductors, bundles, geometry, and length. The class computes series impedance (rpu, xpu) and shunt admittance (bpu) using given formulas. These values are then used to construct an admittance matrix (yprim), essential for power flow analysis. This model allows detailed simulation of how electrical power is transmitted between two points in a power system.
 	
 	\section{Equations Used for Power Calculations}
+
+	\subsection{Bundle}
+	1 conductor: \\
+	$DSC = r$ \\
+	$DSL = GMR (\text{geometric mean radius})$ \\
+	\\
+	2 conductors: \\
+	$DSC = \sqrt{r * s}$ -- r is radius and s is spacing \\
+	$DSL = \sqrt{GMR * s}$ \\
+	\\
+	3 conductors: \\
+	$DSC = \sqrt[n]{r * s^2}$ \\
+	$DSL = \sqrt[n]{GMR * s^2}$ \\
+	\\
+	4 conductors: \\
+	$DSC = 1.091 * (r * s^4)^{1/4}$ \\
+	$DSL = 1.091 * (GMR * s^4)^{1/4}$
+	
+	\subsection{Circuit}
+	Y-Prim = \\
+	Y-Bus = \\
+	
+	
+	
+	
+	
 	\noindent
 	Transformer Impedance: $Z_{pu} = Z_\% / 100 * S_{\text{base}} / S_{\text{transformer}} * \angle{\theta}$
 	
@@ -81,7 +107,7 @@
 	Transformer Y-Bus Matrix: [ $Y_{\text{Bus}}$ ] = [$Y_{11}$ $-Y_{12}$]
 	
 	\noindent
-	\phantom{Transformer Y-Bus Matrix: [ $Y_{Bus}$ ] = }[$-Y_{21}$ $Y_{22}$]
+	\phantom{Transformer Y-Bus Matrix: [ $Y_{\text{Bus}}$ ] = }[$-Y_{21}$ $Y_{22}$]
 	
 	\section{Example Problem with Solution}
 	

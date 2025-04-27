@@ -8,8 +8,6 @@ class Load:
         self.real_power = real_power
         self.reactive_power = reactive_power
 
-        #add load to the specific bus
-
 if __name__ == '__main__':
     bus1 = Bus("B1", 1.2, "Slack Bus", 1.0, 0.0)
 

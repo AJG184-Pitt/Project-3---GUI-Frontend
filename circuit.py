@@ -6,7 +6,6 @@ from transformer import Transformer
 from transmissionline import TransmissionLine
 from load import Load
 from generator import Generator
-import numpy as np
 import pandas as pd
 
 class Circuit:
@@ -53,8 +52,8 @@ class Circuit:
         self.buses[bus].real_power -= real_power
         self.buses[bus].reactive_power -= reactive_power
 
-    def add_generator(self, name, bus, voltage_setpoint, mw_setpoint):
-        self.generators[name] = Generator(name, self.buses[bus], voltage_setpoint, mw_setpoint)
+    def add_generator(self, name, bus, voltage_setpoint, mw_setpoint, x1, x2, x0, zg):
+        self.generators[name] = Generator(name, self.buses[bus], voltage_setpoint, mw_setpoint, x1, x2, x0, zg)
         self.buses[bus].real_power += mw_setpoint
 
     def calc_ybus(self):
@@ -77,7 +76,6 @@ class Circuit:
                 # Add self-admittances
                 Ybus.iloc[bus1_index, bus1_index] += Yprim[0, 0]
                 Ybus.iloc[bus2_index, bus2_index] += Yprim[1, 1]
-
 
                 # Add mutual admittances
                 Ybus.iloc[bus1_index, bus2_index] += Yprim[0, 1]

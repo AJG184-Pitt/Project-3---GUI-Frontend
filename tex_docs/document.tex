@@ -116,8 +116,68 @@
 	Zg represents ground resistance (Ohms) \\
 	j is the imaginary unit $(\sqrt{-1})$ 
 	
-	\subsection{title}
+	\subsection{Geometry}
+	Euclidean Distance Formula: $d = \sqrt{(x_2 - x_1)^2 + (y_2 - y_1)^2}$ \\
 	
+	\subsection{Jacobian}
+	Active Power: $P_i = V_i \sum_{j=1}^{n} V_j[G_{ij} \cos(\delta_i - \delta_j) + B_{ij} \sin(\delta_i - \delta_j)]$ \\
+	Reactive Power: $Q_i = V_i \sum_{j=1}^{n} V_j[G_{ij} \sin(\delta_i - \delta_j) - \cos(\delta_i - \delta_j)]$ \\
+	Jacobian Sub-matrices: \\
+	\noindent
+	J1: 
+	\begin{equation}
+		J1_{ij} = 
+		\begin{cases} 
+			-V_i^2 \sum_{k \neq i} Y_{ik} \sin (\delta_i - \delta_k - \theta_{ik}) \text{ if } i = j  \\
+			V_i V_j Y_i \sin(\delta_i - \delta_j - \theta_{ik}) \text{ if } i \neq j
+		\end{cases}
+	\end{equation}
+	
+	
+	\noindent
+	J2:
+	\begin{equation}
+		J2_{ij} = 
+		\begin{cases}
+			V_i Y_{ii} \cos(\delta_i - \delta_i - \theta_{ii}) + V_i \sum_{k \neq i} Y_{ik} \cos(\delta_i - \delta_k - \theta_{ik}) \text{ if } i = j \\
+			V_i Y_{ij} \cos(\delta_i - \delta_j - \theta_{ij}) \text{ if } i \neq j
+		\end{cases}
+	\end{equation}
+	J3: 
+	\begin{equation}
+		J3_{ij} = 
+		\begin{cases}
+			V_i^2 \sum_{k \neq i} Y_{ik} \cos(\delta_i - \delta_k - \theta_{ik}) \text{ if } i = j \\
+			-V_i V_j Y_{ij} \cos(\delta_i - \delta_j - \theta_{ij}) \text{ if } i \neq j
+		\end{cases}
+	\end{equation}
+	J4: 
+	\begin{equation}
+		J4_{ij} = 
+		\begin{cases}
+			-V_i Y_{ii} \sin(\delta_i - \delta_i - \theta_{ii}) + V_i \sum_{k \neq i} Y_{ik} \sin(\delta_i - \delta_k - \theta_{ik}) \text{ if } i = j \\
+			V_i Y_{ij} \sin(\delta_i - \delta_j - \theta_{ij}) \text{ if } i \neq j
+		\end{cases}
+	\end{equation}
+	Where: \\
+	$V_i$ and $V_j$: Voltage magnitudes at buses i and j \\
+	$G_{ij}$ and $B_{ij}$: Real and imaginary parts of the admittance between buses i and j \\
+	$Y_{ii}$: Admittance between buses i and j, where $Y_{ij} = G_{ij} + j B_{ij}$ \\
+	$\delta_i$ and $\delta_j$: Phase angles at buses i and j \\
+	$\theta_{ij}$: Phase angle of the admittance $Y_{ij}$
+	
+	\subsection{PowerFlow}
+	Newton-Raphson Method: $J \cdot dx = -\text{mismatch}$ \\
+	Angle and Voltage Corrections: $\Delta \theta_{i}^{k+1} = \Delta \theta_i^k + dx_i$
+	
+	\subsection{Solution}
+	Active Power Mismatch: $\Delta P_i = P_{spec,i} - P_i$ \\
+	Reactive Power Mistmatch: $\Delta Q_i = Q_{spec,i} - Q_i$
+	
+	\subsection{Solution Faults}
+	
+	
+	\subsection{Transformer - \textit{Edit}}
 	\noindent
 	Transformer Impedance: $Z_{pu} = Z_\% / 100 * S_{\text{base}} / S_{\text{transformer}} * \angle{\theta}$
 	

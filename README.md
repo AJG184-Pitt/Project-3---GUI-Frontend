@@ -1,2 +1,2 @@
-# Project-2---Main-Simulator
-Project 2 python files for completing a transformer-based model simulation.
+# Project-2---GUI-Frontend
+This is my Project 3 which will be adding a GUI frontend to the powerflow system from Project 2.

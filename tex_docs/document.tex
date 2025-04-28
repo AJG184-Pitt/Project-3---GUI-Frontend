@@ -72,124 +72,47 @@
 	
 	\section{Equations Used for Power Calculations}
 
-	\subsection{Bundle}
-	1 conductor: \\
-	$DSC = r$ \\
-	$DSL = GMR (\text{geometric mean radius})$ \\
-	\\
-	2 conductors: \\
-	$DSC = \sqrt{r * s}$ -- r is radius and s is spacing \\
-	$DSL = \sqrt{GMR * s}$ \\
-	\\
-	3 conductors: \\
-	$DSC = \sqrt[n]{r * s^2}$ \\
-	$DSL = \sqrt[n]{GMR * s^2}$ \\
-	\\
-	4 conductors: \\
-	$DSC = 1.091 * (r * s^4)^{1/4}$ \\
-	$DSL = 1.091 * (GMR * s^4)^{1/4}$ \\
+	\subsection*{Transformer Impedance}
+	\[ Z_{pu} = \frac{Z_\%}{100} \cdot \frac{S_{base}}{S_{transformer}} \angle{\theta}, \quad \text{where } \theta = \tan^{-1}(X/R). \]
 	
+	\subsection*{Transformer Admittance}
+	\[ Y_{pu} = \frac{1}{Z_{pu}}. \]
+	
+	\subsection*{Jacobian Sub-matrices (Newton-Raphson)}
+	For the Jacobian sub-matrices, define:
+	\[ J_{ij} =
+	\begin{cases}
+		V_i V_j G_{ij} \sin(\delta_i - \delta_j) + B_{ij} \cos(\delta_i - \delta_j), & \text{for } P_i \\
+		V_i V_j (-G_{ij}) \cos(\delta_i - \delta_j) + B_{ij} \sin(\delta_i - \delta_j), & \text{for } Q_i
+	\end{cases}
+	\]
+	
+	\subsection*{Transmission Line Parameters}
+	\[ R_{series} = \left( \frac{p}{n} \right) \times L, \]
+	\[ X_{series} = 2 \pi f \times \mu_0 \times \log\left(\frac{D_{eq}}{D_{SL}}\right) \times L. \]
+	
+	Per unit impedance:
+	\[ Z_{pu} = R_{pu} + jX_{pu}. \]
+	
+	Shunt admittance calculation:
+	\[ B_{shunt} = 2 \pi f \times \frac{\epsilon_0}{\log\left(\frac{D_{eq}}{D_{SC}}\right)} \times L. \]
+	
+	Per unit shunt admittance:
+	\[ B_{pu} = \frac{B_{shunt}}{Y_{base}}. \]
+	
+	Prim matrix calculation:
+	\[ Y' =
+	\begin{bmatrix}
+		Y_p + B/2 & -Y_p \\
+		-Y_p & Y_p + B/2
+	\end{bmatrix},
+	\]
+	where \(Y_p\) is the per unit admittance due to series resistance and reactance, and \(B\) is the shunt conductance (real part of admittance). \\
+
 	\noindent
 	Where: \\
-	DSC is the equivalent diameter of a single circular conductor \\
-	DSL is the geometric mean radius of the bundle \\
-	r is the radius of individual conductors \\
-	s is the spacing between conductors 
-	
-	\subsection{Circuit}
-	Y-Bus[i,i] = sum of all self-admittances at bus i \\
-	Y-Bus[i,j] = -sum of mutual admittances between buses i and j \\
-	\noindent
-	$Z_{\text{transformer}} = \frac{\text{base\_voltage}^2}{\text{power\_rating}} * \frac{\text{impedance\_percent}}{100}$ \\
-	$G_{\text{line}} = \text{conductance per unit length} * \text{length}$ \\
-	$B_{\text{line}} = \text{susceptance per unit length} * \text{length}$ \\
-	$Z_{\text{line}} = R + jX$
-	
-	\subsection{Generator}
-	$Y_1 = 1/jX_1$ \\
-	$Y_2 = 1/jX_2$ \\
-	$Y_0 = 1/(jX_0 + 3Zg)$ \\
-	\noindent
-	Where: \\
-	Y represents admittance (per unit or Siemens) \\
-	X represents reactance (per unit or Ohms) \\
-	Zg represents ground resistance (Ohms) \\
-	j is the imaginary unit $(\sqrt{-1})$ 
-	
-	\subsection{Geometry}
-	Euclidean Distance Formula: $d = \sqrt{(x_2 - x_1)^2 + (y_2 - y_1)^2}$ \\
-	
-	\subsection{Jacobian}
-	Active Power: $P_i = V_i \sum_{j=1}^{n} V_j[G_{ij} \cos(\delta_i - \delta_j) + B_{ij} \sin(\delta_i - \delta_j)]$ \\
-	Reactive Power: $Q_i = V_i \sum_{j=1}^{n} V_j[G_{ij} \sin(\delta_i - \delta_j) - \cos(\delta_i - \delta_j)]$ \\
-	Jacobian Sub-matrices: \\
-	\noindent
-	J1: 
-	\begin{equation}
-		J1_{ij} = 
-		\begin{cases} 
-			-V_i^2 \sum_{k \neq i} Y_{ik} \sin (\delta_i - \delta_k - \theta_{ik}) \text{ if } i = j  \\
-			V_i V_j Y_i \sin(\delta_i - \delta_j - \theta_{ik}) \text{ if } i \neq j
-		\end{cases}
-	\end{equation}
-	
-	
-	\noindent
-	J2:
-	\begin{equation}
-		J2_{ij} = 
-		\begin{cases}
-			V_i Y_{ii} \cos(\delta_i - \delta_i - \theta_{ii}) + V_i \sum_{k \neq i} Y_{ik} \cos(\delta_i - \delta_k - \theta_{ik}) \text{ if } i = j \\
-			V_i Y_{ij} \cos(\delta_i - \delta_j - \theta_{ij}) \text{ if } i \neq j
-		\end{cases}
-	\end{equation}
-	J3: 
-	\begin{equation}
-		J3_{ij} = 
-		\begin{cases}
-			V_i^2 \sum_{k \neq i} Y_{ik} \cos(\delta_i - \delta_k - \theta_{ik}) \text{ if } i = j \\
-			-V_i V_j Y_{ij} \cos(\delta_i - \delta_j - \theta_{ij}) \text{ if } i \neq j
-		\end{cases}
-	\end{equation}
-	J4: 
-	\begin{equation}
-		J4_{ij} = 
-		\begin{cases}
-			-V_i Y_{ii} \sin(\delta_i - \delta_i - \theta_{ii}) + V_i \sum_{k \neq i} Y_{ik} \sin(\delta_i - \delta_k - \theta_{ik}) \text{ if } i = j \\
-			V_i Y_{ij} \sin(\delta_i - \delta_j - \theta_{ij}) \text{ if } i \neq j
-		\end{cases}
-	\end{equation}
-	Where: \\
-	$V_i$ and $V_j$: Voltage magnitudes at buses i and j \\
-	$G_{ij}$ and $B_{ij}$: Real and imaginary parts of the admittance between buses i and j \\
-	$Y_{ii}$: Admittance between buses i and j, where $Y_{ij} = G_{ij} + j B_{ij}$ \\
-	$\delta_i$ and $\delta_j$: Phase angles at buses i and j \\
-	$\theta_{ij}$: Phase angle of the admittance $Y_{ij}$
-	
-	\subsection{PowerFlow}
-	Newton-Raphson Method: $J \cdot dx = -\text{mismatch}$ \\
-	Angle and Voltage Corrections: $\Delta \theta_{i}^{k+1} = \Delta \theta_i^k + dx_i$
-	
-	\subsection{Solution}
-	Active Power Mismatch: $\Delta P_i = P_{spec,i} - P_i$ \\
-	Reactive Power Mistmatch: $\Delta Q_i = Q_{spec,i} - Q_i$
-	
-	\subsection{Solution Faults}
-	
-	
-	\subsection{Transformer - \textit{Edit}}
-	\noindent
-	Transformer Impedance: $Z_{pu} = Z_\% / 100 * S_{\text{base}} / S_{\text{transformer}} * \angle{\theta}$
-	
-	\noindent
-	Transformer Admittance: $Y_{pu} = 1 / Z_{pu}$
-	
-	\noindent
-	Transformer Y-Bus Matrix: [ $Y_{\text{Bus}}$ ] = [$Y_{11}$ $-Y_{12}$]
-	
-	\noindent
-	\phantom{Transformer Y-Bus Matrix: [ $Y_{\text{Bus}}$ ] = }[$-Y_{21}$ $Y_{22}$]
-	
-	\section{Example Problem with Solution}
+	- \(V_i, V_j\): Voltage magnitudes at buses \(i\) and \(j\), \\
+	- \(G_{ij}, B_{ij}\): Real and imaginary parts of the admittance between buses \(i\) and \(j\), \\
+	- \(\delta_i, \delta_j\): Phase angles at buses \(i\) and \(j\).
 	
 \end{document}

@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.27 (TeX Live 2025) (preloaded format=pdflatex 2025.3.22)  27 APR 2025 20:33
+This is pdfTeX, Version 3.141592653-2.6-1.40.27 (TeX Live 2025) (preloaded format=pdflatex 2025.3.22)  28 APR 2025 16:16
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -544,48 +544,26 @@ texmf-dist/fonts/enc/dvips/base/8r.enc}]
 [4]
 
 [5]
-Underfull \hbox (badness 10000) in paragraph at lines 76--91
-
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 76--91
-
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 76--91
-
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 76--91
+Underfull \hbox (badness 10000) in paragraph at lines 109--111
 
  []
 
 
 
 [6]
-Underfull \hbox (badness 10000) in paragraph at lines 120--121
 
- []
-
-
-
-[7]
-
-[8] (./document.aux)
+[7] (./document.aux)
  ***********
 LaTeX2e <2024-11-01> patch level 2
 L3 programming layer <2025-01-18>
  ***********
  ) 
 Here is how much of TeX's memory you used:
- 15541 strings out of 473189
- 325357 string characters out of 5719958
- 697113 words of memory out of 5000000
- 38534 multiletter control sequences out of 15000+600000
- 574936 words of font info for 66 fonts, out of 8000000 for 9000
+ 15539 strings out of 473189
+ 325382 string characters out of 5719958
+ 694113 words of memory out of 5000000
+ 38535 multiletter control sequences out of 15000+600000
+ 572229 words of font info for 63 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
  116i,9n,121p,965b,234s stack positions out of 10000i,1000n,20000p,200000b,200000s
 <c:/texlive/2025/texmf-dist/fonts/type1/public/amsfonts/cm/cmex10.pfb><c:/tex
@@ -593,16 +571,14 @@ live/2025/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi10.pfb><c:/texlive/2025
 /texmf-dist/fonts/type1/public/amsfonts/cm/cmmi5.pfb><c:/texlive/2025/texmf-dis
 t/fonts/type1/public/amsfonts/cm/cmmi7.pfb><c:/texlive/2025/texmf-dist/fonts/ty
 pe1/public/amsfonts/cm/cmr10.pfb><c:/texlive/2025/texmf-dist/fonts/type1/public
-/amsfonts/cm/cmr5.pfb><c:/texlive/2025/texmf-dist/fonts/type1/public/amsfonts/c
-m/cmr7.pfb><c:/texlive/2025/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.pf
-b><c:/texlive/2025/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy7.pfb><c:/texl
-ive/2025/texmf-dist/fonts/type1/urw/times/utmb8a.pfb><c:/texlive/2025/texmf-dis
-t/fonts/type1/urw/times/utmbi8a.pfb><c:/texlive/2025/texmf-dist/fonts/type1/urw
-/times/utmr8a.pfb>
-Output written on document.pdf (8 pages, 379952 bytes).
+/amsfonts/cm/cmr7.pfb><c:/texlive/2025/texmf-dist/fonts/type1/public/amsfonts/c
+m/cmsy10.pfb><c:/texlive/2025/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy7.p
+fb><c:/texlive/2025/texmf-dist/fonts/type1/urw/times/utmb8a.pfb><c:/texlive/202
+5/texmf-dist/fonts/type1/urw/times/utmr8a.pfb>
+Output written on document.pdf (7 pages, 364822 bytes).
 PDF statistics:
- 96 PDF objects out of 1000 (max. 8388607)
- 60 compressed objects within 1 object stream
+ 83 PDF objects out of 1000 (max. 8388607)
+ 52 compressed objects within 1 object stream
  0 named destinations out of 1000 (max. 500000)
  18 words of extra memory for PDF output out of 10000 (max. 10000000)
 

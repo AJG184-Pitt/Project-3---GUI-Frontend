@@ -3,6 +3,9 @@ from PyQt6.QtWidgets import (QApplication, QMainWindow, QComboBox,
                             QLineEdit, QLabel, QGridLayout, QWidget, QTextEdit, QPushButton)
 from PyQt6.QtCore import Qt, pyqtSignal, QEvent, QTimer
 
+from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
+from matplotlib.figure import Figure
+
 # Import circuit simulation modules
 from circuit import Circuit
 from jacobian import Jacobian
@@ -11,6 +14,12 @@ from solution import Solution
 from load import Load
 from solution_symmetric import Solution_Faults
 import numpy as np
+import logging
+
+WIDTH = 200
+INPUT_HEIGHT = 50
+
+OUTPUT_HEIGHT = 100
 
 class MainWindow(QMainWindow):
     def __init__(self):
@@ -35,74 +44,187 @@ class MainWindow(QMainWindow):
 
         # Create and configure the QComboBox
         self.combo_box = QComboBox()  # Instantiate QComboBox
+        self.combo_box.setStyleSheet("""
+            QComboBox {
+                background-color: #ededed;
+                border-style: solid;
+                border-color: black;
+                border-width: 2px;
+                border-radius: 5px;
+            }
+            QComboBox:focus {
+                border: 2px solid blue;
+            }
+        """)
         options = ['Bus', 'Bundle', 'Transformer', 'Conductor', 'Geometry', 'Transmission Line', 'Load', 'Generator']
         self.combo_box.addItems(options)  # Use addItems on QComboBox
-        self.combo_box.setFixedWidth(200)
-        self.combo_box.setFixedHeight(50)
+        self.combo_box.setFixedWidth(WIDTH)
+        self.combo_box.setFixedHeight(INPUT_HEIGHT)
         self.combo_box.currentIndexChanged.connect(self.update_value_field_placeholder)
 
         # Text box for entering object name
         self.text_name = QLineEdit(central_widget)
-        self.text_name.setFixedWidth(200)
-        self.text_name.setFixedHeight(50)
+        self.text_name.setStyleSheet("""
+            QLineEdit {
+                background-color: #ededed;
+                border-style: solid;
+                border-color: black;
+                border-width: 2px;
+                border-radius: 5px;
+            }
+            QLineEdit:focus {
+                border: 2px solid blue;
+            }
+        """)
+        self.text_name.setFixedWidth(WIDTH)
+        self.text_name.setFixedHeight(INPUT_HEIGHT)
         self.text_name.setPlaceholderText("Enter Name here...")
 
         self.text_value = QLineEdit(central_widget)
-        self.text_value.setFixedWidth(200)
-        self.text_value.setFixedHeight(50)
+        self.text_value.setStyleSheet("""
+            QLineEdit {
+                background-color: #ededed;
+                border-style: solid;
+                border-color: black;
+                border-width: 2px;
+                border-radius: 5px;
+            }
+            QLineEdit:focus {
+                border: 2px solid blue;
+            }
+        """)
+        self.text_value.setFixedWidth(WIDTH)
+        self.text_value.setFixedHeight(INPUT_HEIGHT)
         self.text_value.setPlaceholderText("Enter Value here...")
 
         self.add_button = QPushButton('Add')
+        self.add_button.setStyleSheet("""
+            QPushButton {
+                background-color: #ededed;
+                border-style: solid;
+                border-color: black;
+                border-width: 2px;
+                border-radius: 5px;
+            }
+            QPushButton:focus {
+                border: 2px solid blue;
+            }
+        """)
+        self.add_button.setFixedWidth(WIDTH)
+        self.add_button.setFixedHeight(INPUT_HEIGHT)
         self.add_button.clicked.connect(self.add_object)
 
         # Status label
         self.status_label = QLabel()
-        self.status_label.setFixedWidth(400)
-        self.status_label.setFixedHeight(50)
+        self.status_label.setFixedWidth(WIDTH)
+        self.status_label.setFixedHeight(INPUT_HEIGHT)
 
         # Run simulation button
         self.run_button = QPushButton('Run Simulation')
+        self.run_button.setStyleSheet("""
+            QPushButton {
+                background-color: #ededed;
+                border-style: solid;
+                border-color: black;
+                border-width: 2px;
+                border-radius: 5px;
+            }
+            QPushButton:focus {
+                border: 2px solid blue;
+            }
+        """)
         self.run_button.clicked.connect(self.run_simulation)
-        self.run_button.setFixedWidth(200)
-        self.run_button.setFixedHeight(50)
+        self.run_button.setFixedWidth(WIDTH)
+        self.run_button.setFixedHeight(INPUT_HEIGHT)
 
         self.output1 = QTextEdit(central_widget)
-        self.output1.setFixedWidth(200)
-        self.output1.setFixedHeight(100)
+        self.output1.setStyleSheet("""
+            QTextEdit {
+                background-color: #ededed;
+                border-style: solid;
+                border-color: black;
+                border-width: 2px;
+            }
+        """)
+        self.output1.setFixedWidth(WIDTH)
+        self.output1.setFixedHeight(OUTPUT_HEIGHT)
         self.output1.setPlaceholderText("Circuit Elements")
 
         self.output2 = QTextEdit(central_widget)
-        self.output2.setFixedWidth(200)
-        self.output2.setFixedHeight(100)
+        self.output2.setStyleSheet("""
+            QTextEdit {
+                background-color: #ededed;
+                border-style: solid;
+                border-color: black;
+                border-width: 2px;
+            }
+        """)
+        self.output2.setFixedWidth(WIDTH)
+        self.output2.setFixedHeight(OUTPUT_HEIGHT)
         self.output2.setPlaceholderText("Bus Voltages")
 
         self.output3 = QTextEdit(central_widget)
-        self.output3.setFixedWidth(200)
-        self.output3.setFixedHeight(100)
+        self.output3.setStyleSheet("""
+            QTextEdit {
+                background-color: #ededed;
+                border-style: solid;
+                border-color: black;
+                border-width: 2px;
+            }
+        """)
+        self.output3.setFixedWidth(WIDTH)
+        self.output3.setFixedHeight(OUTPUT_HEIGHT)
         self.output3.setPlaceholderText("Power Injections")
 
         self.output4 = QTextEdit(central_widget)
-        self.output4.setFixedWidth(200)
-        self.output4.setFixedHeight(100)
+        self.output4.setStyleSheet("""
+            QTextEdit {
+                background-color: #ededed;
+                border-style: solid;
+                border-color: black;
+                border-width: 2px;
+            }
+        """)
+        self.output4.setFixedWidth(WIDTH)
+        self.output4.setFixedHeight(OUTPUT_HEIGHT)
         self.output4.setPlaceholderText("Mismatch")
 
         self.output5 = QTextEdit(central_widget)
-        self.output5.setFixedWidth(200)
-        self.output5.setFixedHeight(100)
+        self.output5.setStyleSheet("""
+            QTextEdit {
+                background-color: #ededed;
+                border-style: solid;
+                border-color: black;
+                border-width: 2px;
+            }
+        """)
+        self.output5.setFixedWidth(WIDTH)
+        self.output5.setFixedHeight(OUTPUT_HEIGHT)
         self.output5.setPlaceholderText("Iterations")
 
         self.output6 = QTextEdit(central_widget)
-        self.output6.setFixedWidth(200)
-        self.output6.setFixedHeight(100)
+        self.output6.setStyleSheet("""
+            QTextEdit {
+                background-color: #ededed;
+                border-style: solid;
+                border-color: black;
+                border-width: 2px;
+            }
+        """)
+        self.output6.setFixedWidth(WIDTH)
+        self.output6.setFixedHeight(OUTPUT_HEIGHT)
         self.output6.setPlaceholderText("Fault Analysis")
+
+        self.figure = Figure()
+        self.canvas = FigureCanvas(self.figure)
 
         # Blank object
         for i in range(36):
             blank_label = f'blank{i}'
             setattr(self, blank_label, QLabel())
             blank_label = getattr(self, blank_label)
-            blank_label.setFixedWidth(200)
-            blank_label.setFixedHeight(50)
+            blank_label.setFixedWidth(WIDTH)
+            blank_label.setFixedHeight(INPUT_HEIGHT)
 
         for i in range(6):
             for j in range(6):
@@ -113,17 +235,20 @@ class MainWindow(QMainWindow):
         grid.addWidget(self.combo_box, 2, 0)
         grid.addWidget(self.text_name, 2, 1)
         grid.addWidget(self.text_value, 2, 2)
-        grid.addWidget(self.add_button, 3, 1)
-        grid.addWidget(self.run_button, 3, 0)
+        grid.addWidget(self.add_button, 3, 0)
+        grid.addWidget(self.run_button, 3, 1)
         grid.addWidget(self.status_label, 3, 2)
 
         # Output textbox fields
-        grid.addWidget(self.output1, 1, 4)
-        grid.addWidget(self.output2, 2, 4)
-        grid.addWidget(self.output3, 3, 4)
-        grid.addWidget(self.output4, 4, 4)
-        grid.addWidget(self.output5, 5, 4)
-        grid.addWidget(self.output6, 6, 4)
+        grid.addWidget(self.output1, 0, 3)
+        grid.addWidget(self.output2, 0, 4)
+        grid.addWidget(self.output3, 0, 5)
+        grid.addWidget(self.output4, 1, 3)
+        grid.addWidget(self.output5, 1, 4)
+        grid.addWidget(self.output6, 1, 5)
+
+        # Graph output 
+        grid.addWidget(self.canvas, 2, 3, 4, 3)
 
         # First, set all output text boxes to read-only and disable focus
         self.output1.setReadOnly(True)
@@ -336,46 +461,62 @@ class MainWindow(QMainWindow):
         self.output1.setText(elements_text)
 
     def run_simulation(self):
-        """Run the powerflow simulation on the current circuit"""
         try:
             self.status_label.setText("Running simulation...")
-            
-            # Debug: Print bus information
-            print("Bus information before simulation:")
-            for name, bus in self.circuit.buses.items():
-                print(f"Bus {name}: type={bus.bus_type}, vpu={getattr(bus, 'vpu', 'N/A')}, delta={getattr(bus, 'delta', 'N/A')}")
-
-            if "Bus1" in self.circuit.buses:
-                self.circuit.buses["Bus1"].bus_type = 'Slack Bus'
-                print("Set Bus1 as Slack Bus")
-            
-            # Calculate Y-bus matrix
-            self.circuit.calc_ybus()
-            
-            # Initialize powerflow and run solution
-            powerflow = PowerFlow(self.circuit)
-            
-            # Debug: Print additional info
-            print("Number of buses:", len(self.circuit.buses))
-            print("Bus types:", [bus.bus_type for bus in self.circuit.buses.values()])
-            
-            results = powerflow.solve_circuit(self.circuit)
-            
-            # Update the output windows with results
-            self.update_simulation_results(results)
-            
-            # If there are sufficient buses, run fault analysis
-            if len(self.circuit.buses) > 0:
-                self.run_fault_analysis()
-            
+            self._validate_circuit()
+            self._setup_simulation()
+            results = self._execute_powerflow()
+            self._update_results(results)
+            self._plot_results(results)
             self.status_label.setText("Simulation completed successfully")
-            
         except Exception as e:
-            self.status_label.setText(f"Simulation error: {str(e)}")
-            print(f"Error running simulation: {str(e)}")
-            # Print the full traceback for debugging
-            import traceback
-            traceback.print_exc()
+            self._handle_error(e)
+
+    def _validate_circuit(self):
+        if not self.circuit.buses:
+            raise ValueError("No buses in the circuit. Add at least one bus before running the simulation.")
+
+    def _setup_simulation(self):
+        logging.debug("Calculating Y-bus matrix...")
+        self.circuit.calc_ybus()
+
+    def _execute_powerflow(self):
+        logging.debug("Initializing powerflow solver...")
+        powerflow = PowerFlow(self.circuit)
+        return powerflow.solve_circuit(self.circuit)
+
+    def _update_results(self, results):
+        self.update_simulation_results(results)
+        if self.circuit.buses:
+            self.run_fault_analysis()
+
+    def _plot_results(self, results):
+        self.figure.clear()
+        ax = self.figure.add_subplot(111)
+
+        # Extract bus names and voltages
+        bus_names = list(results['voltages'].keys())
+        voltages = list(results['voltages'].values())
+
+        # Sort buses in the order they appear along the transmission line
+        # Example: Sort by numeric part of bus names (e.g., "Bus1", "Bus2")
+        sorted_buses = sorted(bus_names, key=lambda x: int(x.split('Bus')[1])) if any('Bus' in name for name in bus_names) else bus_names
+        sorted_voltages = [voltages[bus_names.index(bus)] for bus in sorted_buses]
+
+        # Plot as a line
+        ax.plot(range(len(sorted_buses)), sorted_voltages, marker='o', linestyle='-', color='b')
+        ax.set_title('Voltage Profile Along Transmission Line')
+        ax.set_ylabel('Voltage (pu)')
+        ax.set_xlabel('Position Along Line')
+        ax.set_xticks(range(len(sorted_buses)))
+        ax.set_xticklabels(sorted_buses)
+        ax.grid(True)
+
+        self.canvas.draw()
+
+    def _handle_error(self, e):
+        self.status_label.setText(f"Simulation error: {str(e)}")
+        logging.error(f"Error running simulation: {str(e)}", exc_info=True)
 
     def update_simulation_results(self, results):
         """Update the output text fields with simulation results"""
@@ -444,7 +585,7 @@ class MainWindow(QMainWindow):
             print(f"Error running fault analysis: {str(e)}")
 
 
-def main():
+def main(): 
     app = QApplication([])  # Pass an empty list to QApplication
     window = MainWindow()
     window.show()

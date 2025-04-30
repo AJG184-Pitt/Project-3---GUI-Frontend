@@ -494,25 +494,48 @@ class MainWindow(QMainWindow):
         self.figure.clear()
         ax = self.figure.add_subplot(111)
 
-        # Extract bus names and voltages
-        bus_names = list(results['voltages'].keys())
-        voltages = list(results['voltages'].values())
-
-        # Sort buses in the order they appear along the transmission line
-        # Example: Sort by numeric part of bus names (e.g., "Bus1", "Bus2")
-        sorted_buses = sorted(bus_names, key=lambda x: int(x.split('Bus')[1])) if any('Bus' in name for name in bus_names) else bus_names
-        sorted_voltages = [voltages[bus_names.index(bus)] for bus in sorted_buses]
-
+        # Check if we have voltage results
+        if 'v_mag' not in results or 'v_ang' not in results:
+            print("Warning: Voltage results not found in simulation output")
+            return []
+        
+        # Get bus names from the circuit
+        bus_names = list(self.circuit.buses.keys())
+        
+        # Extract voltage magnitudes from results
+        voltages = results['v_mag']
+        
+        # Create Bus objects for each bus
+        buses = []
+        for i, name in enumerate(bus_names):
+            if i < len(voltages):
+                # Create a Bus object for each entry
+                bus = type('Bus', (), {})()  # Create a simple object dynamically
+                bus.name = name
+                bus.vpu = voltages[i]
+                buses.append(bus)
+        
+        # Sort buses by their position
+        sorted_buses = sorted(buses, key=lambda b: int(b.name.split('Bus')[1]) 
+                            if 'Bus' in b.name else 0)
+        
+        # Extract the sorted data for plotting
+        sorted_names = [bus.name for bus in sorted_buses]
+        sorted_voltages = [bus.vpu for bus in sorted_buses]
+        
         # Plot as a line
         ax.plot(range(len(sorted_buses)), sorted_voltages, marker='o', linestyle='-', color='b')
         ax.set_title('Voltage Profile Along Transmission Line')
         ax.set_ylabel('Voltage (pu)')
         ax.set_xlabel('Position Along Line')
         ax.set_xticks(range(len(sorted_buses)))
-        ax.set_xticklabels(sorted_buses)
+        ax.set_xticklabels(sorted_names)
         ax.grid(True)
-
+        
         self.canvas.draw()
+        
+        # Return the bus objects if needed elsewhere
+        return sorted_buses
 
     def _handle_error(self, e):
         self.status_label.setText(f"Simulation error: {str(e)}")

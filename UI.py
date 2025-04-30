@@ -51,6 +51,7 @@ class MainWindow(QMainWindow):
                 border-color: black;
                 border-width: 2px;
                 border-radius: 5px;
+                color: black;
             }
             QComboBox:focus {
                 border: 2px solid blue;
@@ -71,6 +72,7 @@ class MainWindow(QMainWindow):
                 border-color: black;
                 border-width: 2px;
                 border-radius: 5px;
+                color: black;
             }
             QLineEdit:focus {
                 border: 2px solid blue;
@@ -88,6 +90,7 @@ class MainWindow(QMainWindow):
                 border-color: black;
                 border-width: 2px;
                 border-radius: 5px;
+                color: black;
             }
             QLineEdit:focus {
                 border: 2px solid blue;
@@ -105,6 +108,7 @@ class MainWindow(QMainWindow):
                 border-color: black;
                 border-width: 2px;
                 border-radius: 5px;
+                color: black;
             }
             QPushButton:focus {
                 border: 2px solid blue;
@@ -128,6 +132,7 @@ class MainWindow(QMainWindow):
                 border-color: black;
                 border-width: 2px;
                 border-radius: 5px;
+                color: black;
             }
             QPushButton:focus {
                 border: 2px solid blue;
@@ -144,6 +149,7 @@ class MainWindow(QMainWindow):
                 border-style: solid;
                 border-color: black;
                 border-width: 2px;
+                color: black;
             }
         """)
         self.output1.setFixedWidth(WIDTH)
@@ -157,6 +163,7 @@ class MainWindow(QMainWindow):
                 border-style: solid;
                 border-color: black;
                 border-width: 2px;
+                color: black;
             }
         """)
         self.output2.setFixedWidth(WIDTH)
@@ -170,6 +177,7 @@ class MainWindow(QMainWindow):
                 border-style: solid;
                 border-color: black;
                 border-width: 2px;
+                color: black;
             }
         """)
         self.output3.setFixedWidth(WIDTH)
@@ -183,6 +191,7 @@ class MainWindow(QMainWindow):
                 border-style: solid;
                 border-color: black;
                 border-width: 2px;
+                color: black;
             }
         """)
         self.output4.setFixedWidth(WIDTH)
@@ -196,6 +205,7 @@ class MainWindow(QMainWindow):
                 border-style: solid;
                 border-color: black;
                 border-width: 2px;
+                color: black;
             }
         """)
         self.output5.setFixedWidth(WIDTH)
@@ -209,6 +219,7 @@ class MainWindow(QMainWindow):
                 border-style: solid;
                 border-color: black;
                 border-width: 2px;
+                color: black;
             }
         """)
         self.output6.setFixedWidth(WIDTH)

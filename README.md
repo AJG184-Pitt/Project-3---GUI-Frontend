@@ -80,8 +80,7 @@ pip install PyQt6 numpy matplotlib
    - Core simulation modules: `circuit.py`, `jacobian.py`, `powerflow.py`, `solution.py`, etc.
    - GUI module: `UI.py`
    - Test modules: `UI_testcase.py`, `UI_testcase_2.py`
-
-3. Create an `Assets` folder in the same directory and add a background image named `background.jpg`
+   - Assets folder with the image `background.jpg`
 
 ### Running the Application
 
@@ -158,10 +157,7 @@ The following test cases are included to validate the application:
 
 ### References
 
-1. Grainger, J.J. and Stevenson, W.D., "Power System Analysis", McGraw-Hill, 1994.
-2. Arrillaga, J. and Watson, N.R., "Computer Modelling of Electrical Power Systems", Wiley, 2001.
-3. Milano, F., "Power System Modelling and Scripting", Springer, 2010.
-4. Glover, J.D., Sarma, M.S., and Overbye, T.J., "Power System Analysis and Design", Cengage Learning, 2016.
+1. GLOVER, J. Duncan, and Mulukutla SARMA. Power System Analysis and Design: With Personal Computer Applications. PWS, 1994. 
 
 ### Limitations
 

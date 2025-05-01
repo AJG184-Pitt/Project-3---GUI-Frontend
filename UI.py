@@ -1,6 +1,6 @@
 from PyQt6.QtGui import QPixmap, QKeyEvent
 from PyQt6.QtWidgets import (QApplication, QMainWindow, QComboBox,
-                            QLineEdit, QLabel, QGridLayout, QWidget, QTextEdit, QPushButton)
+                            QLineEdit, QLabel, QGridLayout, QWidget, QTextEdit, QPushButton, QFrame, QVBoxLayout)
 from PyQt6.QtCore import Qt, pyqtSignal, QEvent, QTimer
 
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
@@ -33,13 +33,25 @@ class MainWindow(QMainWindow):
         
         # Create central widget and layout
         central_widget = QWidget()
-        central_widget.setStyleSheet(f"""
-            QWidget {{
-                background-repeat: no-repeat;
-                background-position: center;
-            }}
-        """)
+        central_widget.setObjectName("centralWidget")
+        central_widget.setFixedWidth(1280)
+        central_widget.setFixedHeight(720)
+        # central_widget.setStyleSheet("""
+        #     QWidget#centralWidget {
+        #         background-image: url("Assets/background_plot.png");
+        #         background-repeat: no-repeat;
+        #         background-position: center;
+        #         background-size: cover;
+        #     }
+        # """)
         self.setCentralWidget(central_widget)
+
+        background_label = QLabel(central_widget)
+        background_label.setGeometry(0, 0, 1280, 720)
+        pixmap = QPixmap("Assets/background.jpg")
+        background_label.setPixmap(pixmap.scaled(1280, 720, Qt.AspectRatioMode.KeepAspectRatioByExpanding))
+        background_label.lower()  # Push to back
+        
         grid = QGridLayout(central_widget)
 
         # Create and configure the QComboBox
@@ -142,6 +154,25 @@ class MainWindow(QMainWindow):
         self.run_button.setFixedWidth(WIDTH)
         self.run_button.setFixedHeight(INPUT_HEIGHT)
 
+        # Clear circuit dictionary button
+        self.clear_button = QPushButton('Clear Circuit')
+        self.clear_button.setStyleSheet("""
+            QPushButton {
+                background-color: #ededed;
+                border-style: solid;
+                border-color: black;
+                border-width: 2px;
+                border-radius: 5px;
+                color: black;
+            }
+            QPushButton:focus {
+                border: 2px solid blue;
+            }
+        """)
+        self.clear_button.clicked.connect(self.remove_objects)
+        self.clear_button.setFixedWidth(WIDTH)
+        self.clear_button.setFixedHeight(INPUT_HEIGHT)
+
         self.output1 = QTextEdit(central_widget)
         self.output1.setStyleSheet("""
             QTextEdit {
@@ -226,8 +257,17 @@ class MainWindow(QMainWindow):
         self.output6.setFixedHeight(OUTPUT_HEIGHT)
         self.output6.setPlaceholderText("Fault Analysis")
 
+        self.figure_frame = QFrame(central_widget)
+        self.figure_frame.setFrameShape(QFrame.Shape.Box)
+        self.figure_frame.setLineWidth(2)
+        self.figure_frame.setStyleSheet("border: 2px solid black;")
+        
+        frame_layout = QVBoxLayout(self.figure_frame)
+        frame_layout.setContentsMargins(0, 0, 0, 0)  # Remove internal margins
+        
         self.figure = Figure()
         self.canvas = FigureCanvas(self.figure)
+        frame_layout.addWidget(self.canvas)
 
         # Blank object
         for i in range(36):
@@ -248,7 +288,8 @@ class MainWindow(QMainWindow):
         grid.addWidget(self.text_value, 2, 2)
         grid.addWidget(self.add_button, 3, 0)
         grid.addWidget(self.run_button, 3, 1)
-        grid.addWidget(self.status_label, 3, 2)
+        grid.addWidget(self.clear_button, 3, 2)
+        grid.addWidget(self.status_label, 4, 0)
 
         # Output textbox fields
         grid.addWidget(self.output1, 0, 3)
@@ -259,7 +300,7 @@ class MainWindow(QMainWindow):
         grid.addWidget(self.output6, 1, 5)
 
         # Graph output 
-        grid.addWidget(self.canvas, 2, 3, 4, 3)
+        grid.addWidget(self.figure_frame, 2, 3, 4, 3)
 
         # First, set all output text boxes to read-only and disable focus
         self.output1.setReadOnly(True)
@@ -287,7 +328,8 @@ class MainWindow(QMainWindow):
         self.setTabOrder(self.text_name, self.text_value)
         self.setTabOrder(self.text_value, self.add_button)
         self.setTabOrder(self.add_button, self.run_button)
-        self.setTabOrder(self.run_button, self.combo_box)  # Cycle back to start
+        self.setTabOrder(self.run_button, self.clear_button)
+        self.setTabOrder(self.clear_button, self.combo_box) # Cycle back to start
         
         # Initialize additional component fields
         self.additional_fields = {}
@@ -617,6 +659,31 @@ class MainWindow(QMainWindow):
         except Exception as e:
             self.output6.setText(f"Fault analysis error: {str(e)}")
             print(f"Error running fault analysis: {str(e)}")
+
+    def remove_objects(self):
+        # Recreate a new circuit
+        self.circuit = Circuit("Circuit Simulation")
+        
+        # Clear all stored circuit elements
+        for key in self.circuit_elements:
+            self.circuit_elements[key] = []
+        
+        # Update the display
+        self.update_circuit_elements_display()
+        
+        # Clear output text boxes
+        self.output1.setText("Circuit Elements:")
+        self.output2.setText("")
+        self.output3.setText("")
+        self.output4.setText("")
+        self.output5.setText("")
+        self.output6.setText("")
+        
+        # Clear the graph
+        self.figure.clear()
+        self.canvas.draw()
+        
+        self.status_label.setText("Circuit cleared")
 
 
 def main(): 

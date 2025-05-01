@@ -189,6 +189,10 @@ class PowerFlow {
     +solve_circuit(circuit, tol, max_iter)    
 }
 
+class MainWindow {
+    
+}
+
 Circuit --> Bundle
 Circuit --> Bus
 Circuit --> Conductor

@@ -21,16 +21,21 @@ class Solution_Faults:
         num_buses = len(self.circuit.buses)
         self.ybus = np.zeros((num_buses, num_buses), dtype=complex)
 
-        # ** Do this **
-        # y_bus[1,1] = ybus[1,1] + generator.y1
-        # y_bus[7,7] = ybus[7,7] + generator.y1
 
-        self.ybus[0,0] = self.ybus[0,0] + generators["G1"].y_bus_admittance
-        self.ybus[6,6] = self.ybus[6,6] + generators["G7"].y_bus_admittance
+        # self.ybus[0,0] = self.ybus[0,0] + generators["G1"].y_bus_admittance
+        # self.ybus[6,6] = self.ybus[6,6] + generators["G7"].y_bus_admittance
         
         for i in range(num_buses):
             for j in range(num_buses):
                 self.ybus[i, j] = self.circuit.ybus.iloc[i, j]
+
+        # Add generator contributions dynamically, not hardcoded
+        for gen_name, generator in generators.items():
+            if hasattr(generator, 'bus') and hasattr(generator.bus, 'index'):
+                bus_idx = generator.bus.index
+                if 0 <= bus_idx < num_buses:  # Check index is in bounds
+                    if hasattr(generator, 'y_bus_admittance'):
+                        self.ybus[bus_idx, bus_idx] += generator.y_bus_admittance
         
         # Calculate Zbus (inverse of Ybus)
         self.zbus = np.linalg.inv(self.ybus)

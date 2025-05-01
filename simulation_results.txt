@@ -1,0 +1,104 @@
+===== SIMULATION RESULTS =====
+
+OUTPUT 1 (Circuit Elements):
+Circuit Elements:
+
+Bus:
+  - Bus1 (20.0 kV, Slack Bus)
+  - Bus2 (230.0 kV, PQ Bus)
+  - Bus3 (230.0 kV, PQ Bus)
+  - Bus4 (230.0 kV, PQ Bus)
+  - Bus5 (230.0 kV, PQ Bus)
+  - Bus6 (230.0 kV, PQ Bus)
+  - Bus7 (18.0 kV, PV Bus)
+
+Bundle:
+  - B1 (2 @ 1.5ft, C1)
+
+Transformer:
+  - T1 (Bus1-Bus2, 125.0 MVA)
+  - T2 (Bus6-Bus7, 200.0 MVA)
+
+Conductor:
+  - C1 (0.385 A)
+
+Geometry:
+  - G1
+
+Transmission Line:
+  - L1 (Bus2-Bus4, 10.0mi)
+  - L2 (Bus2-Bus3, 25.0mi)
+  - L3 (Bus3-Bus5, 20.0mi)
+  - L4 (Bus4-Bus6, 20.0mi)
+  - L5 (Bus5-Bus6, 10.0mi)
+  - L6 (Bus4-Bus5, 35.0mi)
+
+Load:
+  - load2 (Bus2, 0.0MW, 0.0MVAR)
+  - Load3 (Bus3, 110.0MW, 50.0MVAR)
+  - Load4 (Bus4, 100.0MW, 70.0MVAR)
+  - Load5 (Bus5, 100.0MW, 65.0MVAR)
+  - Load6 (Bus6, 0.0MW, 0.0MVAR)
+
+Generator:
+  - G1 (Bus1, 0.0MW)
+  - G7 (Bus7, 200.0MW)
+
+
+
+OUTPUT 2 (Bus Voltages):
+Bus Voltages:
+
+Bus1: 1.0000 ∠0.00°
+Bus2: 0.9360 ∠-4.46°
+Bus3: 0.9194 ∠-5.49°
+Bus4: 0.9288 ∠-4.72°
+Bus5: 0.9256 ∠-4.86°
+Bus6: 0.9385 ∠-3.97°
+Bus7: 1.0000 ∠2.08°
+
+
+OUTPUT 3 (Power Injections):
+Power Injections:
+
+Bus1: P = 1.1636 p.u., Q = 0.8713 p.u.
+Bus2: P = -0.0000 p.u., Q = 0.0000 p.u.
+Bus3: P = -1.1000 p.u., Q = -0.5000 p.u.
+Bus4: P = -1.0000 p.u., Q = -0.7000 p.u.
+Bus5: P = -1.0000 p.u., Q = -0.6500 p.u.
+Bus6: P = -0.0000 p.u., Q = 0.0001 p.u.
+Bus7: P = 2.0000 p.u., Q = 1.0766 p.u.
+
+
+OUTPUT 4 (Mismatch):
+Final Mismatch:
+
+Maximum Mismatch: 0.000053
+
+
+OUTPUT 5 (Iterations):
+Convergence History:
+
+Converged: True
+Iterations: 2
+
+Iter 1: Mismatch = 0.034122
+Iter 2: Mismatch = 0.000053
+
+
+OUTPUT 6 (Fault Analysis):
+Fault Analysis:
+
+Fault at Bus1:
+Fault Current: 11.9408 pu
+
+Bus Voltages During Fault:
+Bus1: 0.0000 pu
+Bus2: 0.2458 pu
+Bus3: 0.2764 pu
+Bus4: 0.2760 pu
+Bus5: 0.3024 pu
+Bus6: 0.3239 pu
+Bus7: 0.5302 pu
+
+

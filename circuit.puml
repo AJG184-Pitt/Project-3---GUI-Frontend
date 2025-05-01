@@ -189,6 +189,33 @@ class PowerFlow {
     +solve_circuit(circuit, tol, max_iter)    
 }
 
+class MainWindow {
+    +circuit: Circuit
+    +combo_box: QComboBox
+    +text_name: QLineEdit
+    +text_value: QLineEdit
+    +add_button: QPushButton
+    +status_label: QLabel
+    +run_button: QPushButton
+    +clear_button: QPushButton
+    +output1: QTextEdit
+    +output2: QTextEdit
+    +output3: QTextEdit
+    +output4: QTextEdit
+    +output5: QTextEdit
+    +output6: QTextEdit
+    +figure_frame: QFrame
+    +figure: Figure
+    +canvas: FigureCanvas
+    +circuit_elements: dict
+    +additional_fields: dict
+    +update_value_field_placeholder()
+    +add_object()
+    +run_simulation()
+    +update_circuit_elements_display()
+    +run_fault_analysis()
+}
+
 Circuit --> Bundle
 Circuit --> Bus
 Circuit --> Conductor
@@ -225,5 +252,9 @@ Jacobian --> Load
 
 PowerFlow --> Jacobian
 PowerFlow --> Solution
+
+MainWindow --> Circuit
+MainWindow --> PowerFlow
+MainWindow --> Solution_Faults
 
 @enduml

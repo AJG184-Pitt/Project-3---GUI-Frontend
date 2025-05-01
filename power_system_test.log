@@ -1,0 +1,84 @@
+2025-05-01 16:45:06,384 - INFO - Added Bus: Bus1 with value=138,Slack Bus
+2025-05-01 16:45:07,022 - INFO - Added Bus: Bus2 with value=138,PQ Bus
+2025-05-01 16:45:07,660 - INFO - Added Bus: Bus3 with value=138,PQ Bus
+2025-05-01 16:45:08,297 - INFO - Added Conductor: ACSR336 with value=0.06,0.2,600,0.721
+2025-05-01 16:45:08,937 - INFO - Added Bundle: Single with value=1,0,ACSR336
+2025-05-01 16:45:09,576 - INFO - Added Geometry: FlatHorizontal with value=0,40,10,40,20,40
+2025-05-01 16:45:10,215 - INFO - Added Transmission Line: Line1 with value=Bus1,Bus2,Single,ACSR336,FlatHorizontal,20
+2025-05-01 16:45:10,855 - INFO - Added Transmission Line: Line2 with value=Bus2,Bus3,Single,ACSR336,FlatHorizontal,20
+2025-05-01 16:45:11,493 - INFO - Added Load: Load2 with value=Bus2,50,10
+2025-05-01 16:45:12,134 - INFO - Added Load: Load3 with value=Bus3,75,15
+2025-05-01 16:45:12,774 - INFO - Added Generator: Gen1 with value=Bus1,1.05,300,0.12,0.14,0.05,0
+2025-05-01 16:45:12,774 - INFO - 
+===== SYSTEM SUMMARY BEFORE SIMULATION =====
+2025-05-01 16:45:12,774 - INFO - Number of buses: 3
+2025-05-01 16:45:12,774 - INFO - Number of transmission lines: 2
+2025-05-01 16:45:12,774 - INFO - Number of transformers: 0
+2025-05-01 16:45:12,775 - INFO - Number of loads: 2
+2025-05-01 16:45:12,775 - INFO - Number of generators: 1
+2025-05-01 16:45:12,775 - INFO - 
+--- Bus Details ---
+2025-05-01 16:45:12,775 - ERROR - Error accessing circuit components: 'Bus' object has no attribute 'kv'
+2025-05-01 16:45:12,775 - INFO - 
+===== RUNNING SIMULATION =====
+2025-05-01 16:45:15,198 - INFO - 
+===== SIMULATION RESULTS =====
+2025-05-01 16:46:08,464 - INFO - Added Bus: Bus1 with value=138,Slack Bus
+2025-05-01 16:46:09,100 - INFO - Added Bus: Bus2 with value=138,PQ Bus
+2025-05-01 16:46:09,738 - INFO - Added Bus: Bus3 with value=138,PQ Bus
+2025-05-01 16:46:10,376 - INFO - Added Conductor: ACSR336 with value=0.06,0.2,600,0.721
+2025-05-01 16:46:11,016 - INFO - Added Bundle: Single with value=1,0,ACSR336
+2025-05-01 16:46:11,656 - INFO - Added Geometry: FlatHorizontal with value=0,40,10,40,20,40
+2025-05-01 16:46:12,295 - INFO - Added Transmission Line: Line1 with value=Bus1,Bus2,Single,ACSR336,FlatHorizontal,20
+2025-05-01 16:46:12,933 - INFO - Added Transmission Line: Line2 with value=Bus2,Bus3,Single,ACSR336,FlatHorizontal,20
+2025-05-01 16:46:13,573 - INFO - Added Load: Load2 with value=Bus2,50,10
+2025-05-01 16:46:14,210 - INFO - Added Load: Load3 with value=Bus3,75,15
+2025-05-01 16:46:14,848 - INFO - Added Generator: Gen1 with value=Bus1,1.05,300,0.12,0.14,0.05,0
+2025-05-01 16:46:14,848 - INFO - 
+===== SYSTEM SUMMARY BEFORE SIMULATION =====
+2025-05-01 16:46:14,848 - INFO - Number of buses: 3
+2025-05-01 16:46:14,848 - INFO - Number of transmission lines: 2
+2025-05-01 16:46:14,849 - INFO - Number of transformers: 0
+2025-05-01 16:46:14,849 - INFO - Number of loads: 2
+2025-05-01 16:46:14,849 - INFO - Number of generators: 1
+2025-05-01 16:46:14,849 - INFO - 
+--- Bus Details ---
+2025-05-01 16:46:14,849 - INFO - Bus Bus1: Type=Slack Bus, Value string=Unknown
+2025-05-01 16:46:14,849 - INFO - Bus Bus2: Type=PQ Bus, Value string=Unknown
+2025-05-01 16:46:14,849 - INFO - Bus Bus3: Type=PQ Bus, Value string=Unknown
+2025-05-01 16:46:14,850 - INFO - 
+--- Load Details ---
+2025-05-01 16:46:14,850 - INFO - Load Load2: Bus=<bus.Bus object at 0x000001D7CDF230D0>, P=UnknownMW, Q=UnknownMVAR
+2025-05-01 16:46:14,850 - INFO - Load Load3: Bus=<bus.Bus object at 0x000001D7CD276150>, P=UnknownMW, Q=UnknownMVAR
+2025-05-01 16:46:14,850 - INFO - 
+--- Generator Details ---
+2025-05-01 16:46:14,850 - INFO - Generator Gen1: Bus=<bus.Bus object at 0x000001D7CDF34910>, Voltage=Unknownpu, P=UnknownMW
+2025-05-01 16:46:14,850 - INFO - 
+===== RUNNING SIMULATION =====
+2025-05-01 16:46:17,275 - INFO - 
+===== SIMULATION RESULTS =====
+2025-05-01 16:46:17,275 - INFO - Status: Simulation completed successfully
+2025-05-01 16:47:12,682 - INFO - Added Bus: Bus1 with value=138,Slack Bus
+2025-05-01 16:47:13,318 - INFO - Added Bus: Bus2 with value=138,PQ Bus
+2025-05-01 16:47:13,956 - INFO - Added Bus: Bus3 with value=138,PQ Bus
+2025-05-01 16:47:14,592 - INFO - Added Conductor: ACSR336 with value=0.15,0.4,600,0.721
+2025-05-01 16:47:15,230 - INFO - Added Bundle: Single with value=1,0,ACSR336
+2025-05-01 16:47:15,869 - INFO - Added Geometry: FlatHorizontal with value=0,40,10,40,20,40
+2025-05-01 16:47:16,507 - INFO - Added Transmission Line: Line1 with value=Bus1,Bus2,Single,ACSR336,FlatHorizontal,10
+2025-05-01 16:47:17,144 - INFO - Added Transmission Line: Line2 with value=Bus2,Bus3,Single,ACSR336,FlatHorizontal,10
+2025-05-01 16:47:17,783 - INFO - Added Load: Load2 with value=Bus2,20,5
+2025-05-01 16:47:18,419 - INFO - Added Load: Load3 with value=Bus3,25,8
+2025-05-01 16:47:19,058 - INFO - Added Generator: Gen1 with value=Bus1,1.05,100,0.12,0.14,0.05,0
+2025-05-01 16:47:19,058 - INFO - 
+===== SYSTEM SUMMARY BEFORE SIMULATION =====
+2025-05-01 16:47:19,059 - INFO - Number of buses: 3
+2025-05-01 16:47:19,059 - INFO - Number of transmission lines: 2
+2025-05-01 16:47:19,059 - INFO - Number of transformers: 0
+2025-05-01 16:47:19,059 - INFO - Number of loads: 2
+2025-05-01 16:47:19,059 - INFO - Number of generators: 1
+2025-05-01 16:47:19,059 - INFO - Set initial conditions for Bus1: V=1.05pu, delta=0.0°
+2025-05-01 16:47:19,060 - INFO - 
+===== RUNNING SIMULATION =====
+2025-05-01 16:47:22,478 - INFO - 
+===== SIMULATION RESULTS =====
+2025-05-01 16:47:22,478 - INFO - Status: Simulation completed successfully

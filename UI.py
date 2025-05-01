@@ -36,14 +36,6 @@ class MainWindow(QMainWindow):
         central_widget.setObjectName("centralWidget")
         central_widget.setFixedWidth(1280)
         central_widget.setFixedHeight(720)
-        # central_widget.setStyleSheet("""
-        #     QWidget#centralWidget {
-        #         background-image: url("Assets/background_plot.png");
-        #         background-repeat: no-repeat;
-        #         background-position: center;
-        #         background-size: cover;
-        #     }
-        # """)
         self.setCentralWidget(central_widget)
 
         background_label = QLabel(central_widget)

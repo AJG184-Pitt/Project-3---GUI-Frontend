@@ -1,0 +1,48 @@
+2025-05-01 18:06:44,049 - INFO - 
+===== 5-BUS SYSTEM TEST CASE =====
+2025-05-01 18:06:44,049 - INFO - This test case models the 5-bus system described in the example problem.
+2025-05-01 18:06:44,686 - INFO - Added Bus: Bus1 with value=230,Slack Bus
+2025-05-01 18:06:45,326 - INFO - Added Bus: Bus2 with value=230,PQ Bus
+2025-05-01 18:06:45,965 - INFO - Added Bus: Bus3 with value=230,PV Bus
+2025-05-01 18:06:46,601 - INFO - Added Bus: Bus4 with value=230,PQ Bus
+2025-05-01 18:06:47,239 - INFO - Added Bus: Bus5 with value=230,PQ Bus
+2025-05-01 18:06:47,877 - INFO - Added Conductor: C1 with value=0.02,0.10,600,0.5
+2025-05-01 18:06:48,518 - INFO - Added Conductor: C2 with value=0.03,0.15,600,0.5
+2025-05-01 18:06:49,158 - INFO - Added Conductor: C3 with value=0.02,0.10,600,0.5
+2025-05-01 18:06:49,796 - INFO - Added Conductor: C4 with value=0.01,0.05,600,0.5
+2025-05-01 18:06:50,433 - INFO - Added Conductor: C5 with value=0.04,0.20,600,0.5
+2025-05-01 18:06:51,068 - INFO - Added Bundle: B1 with value=1,0,C1
+2025-05-01 18:06:51,704 - INFO - Added Bundle: B2 with value=1,0,C2
+2025-05-01 18:06:52,341 - INFO - Added Bundle: B3 with value=1,0,C3
+2025-05-01 18:06:52,977 - INFO - Added Bundle: B4 with value=1,0,C4
+2025-05-01 18:06:53,614 - INFO - Added Bundle: B5 with value=1,0,C5
+2025-05-01 18:06:54,249 - INFO - Added Geometry: G1 with value=0,40,10,40,20,40
+2025-05-01 18:06:54,886 - INFO - Added Transmission Line: Line1-2 with value=Bus1,Bus2,B1,C1,G1,1
+2025-05-01 18:06:55,523 - INFO - Added Transmission Line: Line2-3 with value=Bus2,Bus3,B2,C2,G1,1
+2025-05-01 18:06:56,161 - INFO - Added Transmission Line: Line2-4 with value=Bus2,Bus4,B3,C3,G1,1
+2025-05-01 18:06:56,800 - INFO - Added Transmission Line: Line3-5 with value=Bus3,Bus5,B4,C4,G1,1
+2025-05-01 18:06:57,439 - INFO - Added Transmission Line: Line4-5 with value=Bus4,Bus5,B5,C5,G1,1
+2025-05-01 18:06:58,077 - INFO - Added Load: Load2 with value=Bus2,40,20
+2025-05-01 18:06:58,716 - INFO - Added Load: Load4 with value=Bus4,60,30
+2025-05-01 18:06:59,355 - INFO - Added Load: Load5 with value=Bus5,70,35
+2025-05-01 18:06:59,994 - INFO - Added Generator: Gen1 with value=Bus1,1.05,0,0.12,0.14,0.05,0
+2025-05-01 18:07:00,633 - INFO - Added Generator: Gen3 with value=Bus3,1.02,85,0.12,0.14,0.05,0
+2025-05-01 18:07:00,633 - INFO - 
+===== SYSTEM SUMMARY BEFORE SIMULATION =====
+2025-05-01 18:07:00,633 - INFO - Number of buses: 5
+2025-05-01 18:07:00,633 - INFO - Number of transmission lines: 5
+2025-05-01 18:07:00,633 - INFO - Number of loads: 3
+2025-05-01 18:07:00,634 - INFO - Number of generators: 2
+2025-05-01 18:07:00,634 - INFO - Set initial conditions for Bus1: V=1.05pu, delta=0.0°
+2025-05-01 18:07:00,634 - INFO - Set initial conditions for Bus3: V=1.02pu
+2025-05-01 18:07:00,634 - INFO - 
+===== RUNNING SIMULATION =====
+2025-05-01 18:07:03,340 - INFO - 
+===== SIMULATION RESULTS =====
+2025-05-01 18:07:03,340 - INFO - Bus Voltages:
+2025-05-01 18:07:03,340 - INFO - Bus1: 1.0500 pu, 0.0000 rad
+2025-05-01 18:07:03,340 - INFO - Bus2: 1.0000 pu, 0.0000 rad
+2025-05-01 18:07:03,340 - INFO - Bus3: 1.0200 pu, 0.0000 rad
+2025-05-01 18:07:03,341 - INFO - Bus4: 1.0000 pu, 0.0000 rad
+2025-05-01 18:07:03,341 - INFO - Bus5: 1.0000 pu, 0.0000 rad
+2025-05-01 18:07:03,341 - INFO - Simulation Status: Simulation completed successfully

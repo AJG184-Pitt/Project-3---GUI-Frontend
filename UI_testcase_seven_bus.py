@@ -91,7 +91,36 @@ def main():
     # Run the power flow calculation with a longer wait time
     QTest.mouseClick(window.run_button, Qt.MouseButton.LeftButton)
     QTest.qWait(2000)  # Wait longer for simulation to complete
-    
+
+    # Create a results file
+    with open("simulation_results.txt", "w", encoding="utf-8") as f:
+        f.write("===== SIMULATION RESULTS =====\n\n")
+        
+        # Extract text from each output box
+        f.write("OUTPUT 1 (Circuit Elements):\n")
+        f.write(window.output1.toPlainText())
+        f.write("\n\n")
+        
+        f.write("OUTPUT 2 (Bus Voltages):\n")
+        f.write(window.output2.toPlainText())
+        f.write("\n\n")
+        
+        f.write("OUTPUT 3 (Power Injections):\n")
+        f.write(window.output3.toPlainText())
+        f.write("\n\n")
+        
+        f.write("OUTPUT 4 (Mismatch):\n")
+        f.write(window.output4.toPlainText())
+        f.write("\n\n")
+        
+        f.write("OUTPUT 5 (Iterations):\n")
+        f.write(window.output5.toPlainText())
+        f.write("\n\n")
+        
+        f.write("OUTPUT 6 (Fault Analysis):\n")
+        f.write(window.output6.toPlainText())
+        f.write("\n\n")
+        
     # Keep the application running
     sys.exit(app.exec())
 

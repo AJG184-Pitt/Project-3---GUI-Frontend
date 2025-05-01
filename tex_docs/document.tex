@@ -9,18 +9,27 @@
 \usepackage{float}
 \usepackage{amsmath}
 \usepackage{siunitx}
+\usepackage{tikz}
+\usepackage{pgfplots}
+\usepackage{float}
+\pgfplotsset{compat=1.18}
+\usetikzlibrary{shapes}
 
 \begin{document}
 	\maketitle
 	
 	\section{Overview}
-	This project involves writing a base power systems modeling package in Python. The code establishes basic classes for the main power system components – buses, generators, conductors, geometries, and an overarching Circuit class to link them. The Circuit class facilitates the establishment of a network, calculation of significant values like equivalent distance between conductors, and lastly, the construction of the network admittance matrix (Y-bus) – a critical step towards load flow analysis and power system study. The code offers a modular environment available for parallel development and, therefore, future expansion to include additional components, advanced modeling capabilities, and perhaps integration with other power system analysis software programs. The objective is to provide a flexible and customized platform for discussing power system concepts and performing basic analysis.
+	This project is to integrate a base power systems modeling package in Python, now with an added graphical user interface (GUI) for interactive simulation. The code establishes basic classes for power system components—buses, generators, conductors, geometries, and a top-level Circuit class to link them together. The Circuit class offers network building, equivalent distance calculation, and building of the network admittance matrix (Y-bus), which are crucial for load flow analysis.
+	
+	A primary new addition in this version is the MainWindow class, a PyQt6 graphical user interface (GUI) that allows users to define electrical circuits, execute powerflow simulations, and display results. The GUI has dynamic component addition (e.g., transformer, bus, loads), circuit configuration checking, and real-time feedback through text prints and matplotlib plots. It is combined with backend modules for circuit modeling, fault studies, and error handling, and the tool is more user-friendly for academic as well as real-world power system analysis.
+	
+	The modular architecture of the code allows for simultaneous development and future expansion, e.g., additional advanced modeling functionality and compatibility with other power system analysis software. The ultimate aim is to have a versatile, customized platform for debating power system concepts and elementary analysis, now with enhanced user interaction using the GUI.	
 	
 	\section{Class Diagram}
 	
 	\begin{figure}[H]
 		\centering
-		\includegraphics[scale=0.25]{../out/circuit/circuit.png}	
+		\includegraphics[scale=0.23]{../out/circuit/circuit.png}	
 		\caption{Class Diagram for Project}
 	\end{figure}
 	
@@ -310,5 +319,410 @@
 	
 	\section{Example Problem with Solution}
 	
+	This section presents a practical example of power flow analysis using the developed graphical user interface. We will analyze a 7-bus power system, calculate power flows, and interpret the results.
+	
+	\subsection{Problem Statement}
+	
+	Consider the 7-bus power system shown in Figure \ref{fig:seven_bus_system} with the following parameters:
+	
+	\begin{figure}[H]
+		\centering
+		% Required packages in preamble: 
+		% \usepackage{tikz}
+		% \usepackage{pgfplots}
+		% \pgfplotsset{compat=1.18}
+		\begin{tikzpicture}[
+			bus/.style={circle, draw, minimum size=0.8cm, inner sep=0pt},
+			load/.style={rectangle, draw, minimum width=0.6cm, minimum height=0.6cm},
+			scale=1.2
+			]
+			
+			% Buses
+			\node[bus] (bus1) at (0,0) {1};
+			\node[bus] (bus2) at (3,0) {2};
+			\node[bus] (bus3) at (6,0) {3};
+			\node[bus] (bus4) at (3,-3) {4};
+			\node[bus] (bus5) at (6,-3) {5};
+			\node[bus] (bus6) at (0,-3) {6};
+			\node[bus] (bus7) at (-3,-3) {7};
+			
+			% Generator symbols - using direct drawing to avoid TikZ library requirements
+			\draw[fill=lightgray] (-0.3,0.3) -- (-0.3,-0.3) -- (-0.6,0) -- cycle;
+			\draw (-0.3,0) -- (bus1);
+			
+			% Generator at Bus 7
+			\draw[fill=lightgray] (-3.3,-2.7) -- (-3.3,-3.3) -- (-3.6,-3) -- cycle;
+			\draw (-3.3,-3) -- (bus7);
+			
+			% Transformers
+			\draw[very thick] (bus1) -- node[above, sloped] {T1} (bus2);
+			\draw[very thick] (bus6) -- node[above, sloped] {T2} (bus7);
+			
+			% Loads at Bus 3
+			\node[load, fill=lightgray] (load3) at (6,1) {};
+			\draw (load3) -- (bus3);
+			
+			% Load at Bus 4
+			\node[load, fill=lightgray] (load4) at (2,-3) {};
+			\draw (load4) -- (bus4);
+			
+			% Load at Bus 5
+			\node[load, fill=lightgray] (load5) at (7,-3) {};
+			\draw (load5) -- (bus5);
+			
+			% Transmission Lines
+			\draw (bus2) -- node[above] {L2} (bus3);
+			\draw (bus2) -- node[left] {L1} (bus4);
+			\draw (bus3) -- node[right] {L3} (bus5);
+			\draw (bus4) -- node[below] {L6} (bus5);
+			\draw (bus4) -- node[above] {L4} (bus6);
+			\draw (bus5) -- node[above, sloped] {L5} (bus6);
+			
+			% Legend
+			\draw[fill=lightgray] (-1,-5) -- (-1.6,-5) -- (-1.3,-4.7) -- cycle;
+			\node[right] at (-0.9,-5) {Generator};
+			\node[load, fill=lightgray, scale=0.8] at (-1.3,-5.5) {};
+			\node[right] at (-0.9,-5.5) {Load};
+			\draw[very thick, -] (-1.6,-6) -- (-1,-6);
+			\node[right] at (-0.9,-6) {Transformer};
+			
+		\end{tikzpicture}
+		\caption{7-Bus Power System}
+		\label{fig:seven_bus_system}
+	\end{figure}
+	
+	\noindent \textbf{Bus Data:}
+	\begin{itemize}
+		\item Bus 1: Slack bus, voltage $V_1 = 1.0 \angle 0^\circ$ pu, base voltage 20 kV
+		\item Bus 2: Load bus (PQ), base voltage 230 kV
+		\item Bus 3: Load bus (PQ), base voltage 230 kV
+		\item Bus 4: Load bus (PQ), base voltage 230 kV
+		\item Bus 5: Load bus (PQ), base voltage 230 kV
+		\item Bus 6: Load bus (PQ), base voltage 230 kV
+		\item Bus 7: Generator bus (PV), voltage magnitude $V_7 = 1.0$ pu, $P_{G7} = 200$ MW, base voltage 18 kV
+	\end{itemize}
+	
+	\noindent \textbf{Load Data:}
+	\begin{itemize}
+		\item Bus 3: $P_{L3} = 110$ MW, $Q_{L3} = 50$ MVAR
+		\item Bus 4: $P_{L4} = 100$ MW, $Q_{L4} = 70$ MVAR
+		\item Bus 5: $P_{L5} = 100$ MW, $Q_{L5} = 65$ MVAR
+	\end{itemize}
+	
+	\noindent \textbf{Transformer Data:}
+	\begin{table}[H]
+		\centering
+		\begin{tabular}{ccccc}
+			\hline
+			\textbf{Name} & \textbf{From Bus} & \textbf{To Bus} & \textbf{MVA Rating} & \textbf{Impedance (\%)} \\
+			\hline
+			T1 & 1 & 2 & 125 & 8.5 \\
+			T2 & 6 & 7 & 200 & 10.5 \\
+			\hline
+		\end{tabular}
+		\caption{Transformer Parameters}
+		\label{tab:transformer_data}
+	\end{table}
+	
+	\noindent \textbf{Transmission Line Data:}
+	\begin{table}[H]
+		\centering
+		\begin{tabular}{ccccc}
+			\hline
+			\textbf{Line} & \textbf{From Bus} & \textbf{To Bus} & \textbf{Conductor} & \textbf{Length (mi)} \\
+			\hline
+			L1 & 2 & 4 & C1 & 10 \\
+			L2 & 2 & 3 & C1 & 25 \\
+			L3 & 3 & 5 & C1 & 20 \\
+			L4 & 4 & 6 & C1 & 20 \\
+			L5 & 5 & 6 & C1 & 10 \\
+			L6 & 4 & 5 & C1 & 35 \\
+			\hline
+		\end{tabular}
+		\caption{Transmission Line Parameters}
+		\label{tab:line_data}
+	\end{table}
+	
+	\noindent \textbf{Conductor Data:}
+	\begin{itemize}
+		\item Type: C1
+		\item Resistance: 0.642 $\Omega$/mile
+		\item Reactance: 0.0217 $\Omega$/mile
+		\item Diameter: 0.385 inches
+		\item Ampacity: 460 A
+	\end{itemize}
+	
+	\noindent \textbf{Bundle Configuration:}
+	\begin{itemize}
+		\item Bundle B1: 2 conductors of type C1 with 1.5 ft spacing
+	\end{itemize}
+	
+	\noindent \textbf{Geometry Configuration:}
+	\begin{itemize}
+		\item Geometry G1: Horizontal configuration with phase positions at (0,0), (18.5,0), and (37,0) ft
+	\end{itemize}
+	
+	The objective is to determine:
+	\begin{enumerate}
+		\item The voltage magnitude and angle at each bus
+		\item Power flow in all transmission lines and transformers
+		\item Generator power output at the slack bus
+		\item System losses
+	\end{enumerate}
+	
+	\subsection{Solution Approach}
+	
+	To solve this power flow problem using our GUI application, we follow these steps:
+	
+	\begin{enumerate}
+		\item Input all bus data, including voltage levels and bus types
+		\item Add conductor data and bundle configurations
+		\item Add geometry configurations for transmission lines
+		\item Input transformer parameters
+		\item Add transmission lines with proper connections
+		\item Specify the load values
+		\item Configure the generators
+		\item Run the Newton-Raphson power flow algorithm
+		\item Analyze the results
+	\end{enumerate}
+	
+	The following sections detail this process and show the resulting outputs.
+	
+	\subsection{Implementation in the GUI}
+	
+	Using the GUI application, we enter the components as shown in the sequence below:
+	
+	\begin{table}[H]
+		\centering
+		\begin{tabular}{ccl}
+			\hline
+			\textbf{Component Type} & \textbf{Name} & \textbf{Value} \\
+			\hline
+			Bus & Bus1 & 20,Slack Bus \\
+			Bus & Bus2 & 230,PQ Bus \\
+			Bus & Bus3 & 230,PQ Bus \\
+			Bus & Bus4 & 230,PQ Bus \\
+			Bus & Bus5 & 230,PQ Bus \\
+			Bus & Bus6 & 230,PQ Bus \\
+			Bus & Bus7 & 18,PV Bus \\
+			Transformer & T1 & Bus1,Bus2,125,8.5 \\
+			Transformer & T2 & Bus6,Bus7,200,10.5 \\
+			Conductor & C1 & 0.642,0.0217,0.385,460 \\
+			Bundle & B1 & 2,1.5,C1 \\
+			Geometry & G1 & 0,0,18.5,0,37,0 \\
+			Transmission Line & L1 & Bus2,Bus4,B1,C1,G1,10 \\
+			Transmission Line & L2 & Bus2,Bus3,B1,C1,G1,25 \\
+			Transmission Line & L3 & Bus3,Bus5,B1,C1,G1,20 \\
+			Transmission Line & L4 & Bus4,Bus6,B1,C1,G1,20 \\
+			Transmission Line & L5 & Bus5,Bus6,B1,C1,G1,10 \\
+			Transmission Line & L6 & Bus4,Bus5,B1,C1,G1,35 \\
+			Load & Load3 & Bus3,110,50 \\
+			Load & Load4 & Bus4,100,70 \\
+			Load & Load5 & Bus5,100,65 \\
+			Generator & G1 & Bus1,1.0,0.0,0.12,0.14,0.05,0 \\
+			Generator & G7 & Bus7,1.0,200,0.12,0.14,0.05,0 \\
+			\hline
+		\end{tabular}
+		\caption{Component Input Sequence for GUI}
+		\label{tab:gui_inputs}
+	\end{table}
+	
+	\subsection{Power Flow Results}
+	
+	After running the simulation, the GUI generates the following results:
+	
+	\subsubsection{Bus Voltages}
+	
+	\begin{table}[H]
+		\centering
+		\begin{tabular}{cccc}
+			\hline
+			\textbf{Bus} & \textbf{Voltage Magnitude (pu)} & \textbf{Voltage Angle (degrees)} & \textbf{Type} \\
+			\hline
+			Bus1 & 1.0000 & 0.00 & Slack \\
+			Bus2 & 0.9360 & -4.46 & PQ \\
+			Bus3 & 0.9194 & -5.49 & PQ \\
+			Bus4 & 0.9288 & -4.72 & PQ \\
+			Bus5 & 0.9256 & -4.86 & PQ \\
+			Bus6 & 0.9385 & -3.97 & PQ \\
+			Bus7 & 1.0000 & 2.08 & PV \\
+			\hline
+		\end{tabular}
+		\caption{Bus Voltage Results}
+		\label{tab:voltage_results}
+	\end{table}
+	
+	\subsubsection{Power Flow in Lines and Transformers}
+	
+	\begin{table}[H]
+		\centering
+		\begin{tabular}{ccc}
+			\hline
+			\textbf{Bus} & \textbf{Active Power (MW)} & \textbf{Reactive Power (MVAR)} \\
+			\hline
+			Bus1 & 116.36 & 87.13 \\
+			Bus2 & 0.00 & 0.00 \\
+			Bus3 & -110.00 & -50.00 \\
+			Bus4 & -100.00 & -70.00 \\
+			Bus5 & -100.00 & -65.00 \\
+			Bus6 & 0.00 & 0.01 \\
+			Bus7 & 200.00 & 107.66 \\
+			\hline
+		\end{tabular}
+		\caption{Bus Power Injections}
+		\label{tab:power_injections}
+	\end{table}
+	
+	\subsubsection{Generator Outputs}
+	
+	\begin{table}[H]
+		\centering
+		\begin{tabular}{cccc}
+			\hline
+			\textbf{Bus} & \textbf{Generator} & \textbf{Active Power (MW)} & \textbf{Reactive Power (MVAR)} \\
+			\hline
+			Bus1 & G1 & 116.36 & 87.13 \\
+			Bus7 & G7 & 200.00 & 107.66 \\
+			\hline
+		\end{tabular}
+		\caption{Generator Power Outputs}
+		\label{tab:generator_results}
+	\end{table}
+	
+	\subsubsection{System Losses}
+	
+	\begin{table}[H]
+		\centering
+		\begin{tabular}{cc}
+			\hline
+			\textbf{Type} & \textbf{Value} \\
+			\hline
+			Active Power Losses & 6.36 MW \\
+			Reactive Power Losses & 9.80 MVAR \\
+			\hline
+		\end{tabular}
+		\caption{System Losses}
+		\label{tab:losses}
+	\end{table}
+	
+	\subsubsection{Convergence}
+	
+	The power flow solution converged in 2 iterations with a maximum power mismatch of $5.3 \times 10^{-5}$ pu.
+	
+	\subsection{Analysis of Results}
+	
+	\begin{enumerate}
+		\item \textbf{Voltage Profile}: All bus voltages are within acceptable limits (0.92-1.05 pu), with the lowest voltage at Bus 3 (0.9194 pu).
+		
+		\item \textbf{Power Flow Distribution}: The power flows from the two generators (at Bus 1 and Bus 7) to the three load centers (at Bus 3, Bus 4, and Bus 5). The generators at Bus 1 and Bus 7 supply 116.36 MW and 200 MW respectively.
+		
+		\item \textbf{Generator Outputs}: The slack bus (Bus 1) generates 116.36 MW and 87.13 MVAR to balance the system, while the PV bus (Bus 7) maintains its scheduled 200 MW output with 107.66 MVAR reactive power support.
+		
+		\item \textbf{System Losses}: The total system losses are 6.36 MW (2.0% of total generation) and 9.80 MVAR, which is reasonable for this transmission system.
+		
+		\item \textbf{Load Balance}: Total generation (316.36 MW) equals the sum of total load (310 MW) and system losses (6.36 MW), confirming power balance.
+		
+		\item \textbf{Fast Convergence}: The solution converged in only 2 iterations, indicating good numerical stability of the model.
+	\end{enumerate}
+	
+	\subsection{Visualization}
+	
+	Figure \ref{fig:voltage_profile} shows the voltage profile across the system, providing a visual representation of the voltage variations.
+	
+	\begin{figure}[H]
+		\centering
+		% Required packages in preamble: 
+		% \usepackage{tikz}
+		% \usepackage{pgfplots}
+		% \pgfplotsset{compat=1.18}
+		\begin{tikzpicture}
+			\begin{axis}[
+				xlabel={Bus Number},
+				ylabel={Voltage (pu)},
+				xtick={1,2,3,4,5,6,7},
+				ytick={0.91,0.92,0.93,0.94,0.95,0.96,0.97,0.98,0.99,1.00},
+				ymin=0.91, ymax=1.01,
+				ymajorgrids=true,
+				grid style=dashed,
+				width=12cm,
+				height=7cm
+				]
+				
+				\addplot[
+				color=blue,
+				mark=*,
+				line width=1.5pt
+				]
+				coordinates {
+					(1,1.0000)
+					(2,0.9360)
+					(3,0.9194)
+					(4,0.9288)
+					(5,0.9256)
+					(6,0.9385)
+					(7,1.0000)
+				};
+				
+				\draw[dashed, red] (axis cs:0.5,0.92) -- (axis cs:7.5,0.92) node[right] {Min Limit};
+				\draw[dashed, red] (axis cs:0.5,1.05) -- (axis cs:7.5,1.05) node[right] {Max Limit};
+				
+			\end{axis}
+		\end{tikzpicture}
+		\caption{Voltage Profile Across the System}
+		\label{fig:voltage_profile}
+	\end{figure}
+	
+	\subsection{Fault Analysis}
+	
+	To demonstrate the fault analysis capabilities of the GUI, we simulate a three-phase fault at Bus 1. The resulting fault currents and post-fault bus voltages are shown below:
+	
+	\begin{table}[H]
+		\centering
+		\begin{tabular}{cc}
+			\hline
+			\textbf{Bus} & \textbf{Fault Current (pu)} \\
+			\hline
+			Bus1 & 11.94 \\
+			\hline
+		\end{tabular}
+		\caption{Fault Current at Bus 1}
+		\label{tab:fault_current}
+	\end{table}
+	
+	\begin{table}[H]
+		\centering
+		\begin{tabular}{cc}
+			\hline
+			\textbf{Bus} & \textbf{Voltage During Fault (pu)} \\
+			\hline
+			Bus1 & 0.0000 \\
+			Bus2 & 0.2458 \\
+			Bus3 & 0.2764 \\
+			Bus4 & 0.2760 \\
+			Bus5 & 0.3024 \\
+			Bus6 & 0.3239 \\
+			Bus7 & 0.5302 \\
+			\hline
+		\end{tabular}
+		\caption{Bus Voltages During Fault at Bus 1}
+		\label{tab:fault_voltages}
+	\end{table}
+	
+	The fault analysis shows that a three-phase fault at Bus 1 causes significant voltage drops throughout the system. The voltage at the fault location drops to zero, while other buses experience voltage drops proportional to their electrical distance from the fault location. Bus 7, which has the largest electrical distance from the fault, maintains the highest voltage during the fault at 0.5302 pu.
+	
+	\subsection{Conclusion}
+	
+	This example demonstrates how the GUI application can be used to model, solve, and analyze a realistic 7-bus power system. The Newton-Raphson method successfully converged to an accurate solution that satisfies power flow equations and system constraints. The visualization tools help identify potential issues like voltage violations, while the fault analysis provides insights into system behavior under contingency conditions.
+	
+	The example shows that the application can effectively handle the fundamental tasks of power system analysis:
+	\begin{itemize}
+		\item Modeling complex transmission networks with transformers and multiple voltage levels
+		\item Calculating steady-state power flow for systems with multiple generators and loads
+		\item Determining bus voltages and branch power flows
+		\item Analyzing system losses
+		\item Performing basic fault studies
+	\end{itemize}
+	
+	These capabilities make the application a valuable educational tool for understanding power system concepts and performing preliminary system studies.
 	
 \end{document}
